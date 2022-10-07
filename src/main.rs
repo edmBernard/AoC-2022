@@ -103,20 +103,21 @@ fn main() {
 
       // Iteration on files in directory
       if let Ok(dir) = fs::read_dir(input_path) {
-        for filepath in dir.into_iter().filter_map(|value| value.ok()) {
-
-          if let Some(filepath_str) = filepath.file_name().to_str() &&
-              let Some(caps) = re.captures(filepath_str) {
-
+        dir
+          .filter_map(|filepath_result| {
+            let filepath = filepath_result.ok()?;
+            let filename = filepath.file_name();
+            let caps = re.captures(filename.to_str()?)?;
             let captured = caps.get(1).map_or("", |m| m.as_str()).to_owned();
-
             if captured.is_empty() {
-              continue;
+              return None;
             }
             if !name.contains(&captured) {
-              continue;
+              return None;
             }
-
+            Some(filepath)
+          })
+          .for_each(|filepath| {
             let now = Instant::now();
             match command(&filepath.path()) {
               Ok([part1, part2]) => {
@@ -132,9 +133,8 @@ fn main() {
               }
               Err(msg) => eprintln!("Error: in {}: {}", name, msg),
             };
-          }
-        }
-      };
+          });
+      }
     }
   }
 
