@@ -6,6 +6,9 @@ use std::time::Instant;
 
 mod day01;
 
+#[cfg(test)]
+mod test_helper;
+
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -33,6 +36,7 @@ macro_rules! register_command {
         }
     };
 }
+
 
 fn main() {
   let args = Args::parse();
