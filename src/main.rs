@@ -1,4 +1,5 @@
 // #![deny(warnings)]
+#![feature(let_chains)]
 
 use clap::Parser;
 use regex::Regex;
@@ -52,21 +53,17 @@ fn main() {
   let register = register_command!(day01::day01, day01::day01functional);
 
   let mut total_time = 0u128;
+
+  // Apply commands to given files
   if input_path.is_file() {
     println!("{}", input_path.display());
     for (name, command) in register.iter() {
-      // using if let ... && name.contains(...) is not yet ready : https://github.com/rust-lang/rust/issues/53667
-      // same for is_some_and https://github.com/rust-lang/rust/issues/93050
-      if let Some(filter) = args.filter_inclusion.clone() {
-        if !name.contains(&filter) {
-          continue;
-        }
+      if let Some(filter) = args.filter_inclusion.clone() && !name.contains(&filter) {
+        continue;
       }
 
-      if let Some(filter) = args.filter_exclusion.clone() {
-        if name.contains(&filter) {
-          continue;
-        }
+      if let Some(filter) = args.filter_exclusion.clone() && name.contains(&filter) {
+        continue;
       }
 
       let now = Instant::now();
@@ -87,30 +84,32 @@ fn main() {
     }
   }
 
+  // Apply commands all files in directory
+  // respecting the match between day:
+  //   day01.txt -> fn day01()
+  //   day02.txt -> fn day02()
+  //   etc ...
   if input_path.is_dir() {
-    println!("{}", input_path.display());
-    let re = Regex::new(r"(day\d{2})").unwrap();
+    let re = Regex::new(r"(day\d{2})").expect("Failed to parse regex");
 
     for (name, command) in register.iter() {
-
-      if let Some(filter) = args.filter_inclusion.clone() {
-        if !name.contains(&filter) {
-          continue;
-        }
+      if let Some(filter) = args.filter_inclusion.clone() && !name.contains(&filter) {
+        continue;
       }
 
-      if let Some(filter) = args.filter_exclusion.clone() {
-        if name.contains(&filter) {
-          continue;
-        }
+      if let Some(filter) = args.filter_exclusion.clone() && name.contains(&filter) {
+        continue;
       }
 
-      // Iteration of files in directory
+      // Iteration on files in directory
       if let Ok(dir) = fs::read_dir(input_path) {
-        for filepath in dir {
+        for filepath in dir.into_iter().filter_map(|value| value.ok()) {
 
-          if let Some(caps) = re.captures(filepath.as_ref().unwrap().path().to_str().unwrap()) {
+          if let Some(filepath_str) = filepath.file_name().to_str() &&
+              let Some(caps) = re.captures(filepath_str) {
+
             let captured = caps.get(1).map_or("", |m| m.as_str()).to_owned();
+
             if captured.is_empty() {
               continue;
             }
@@ -119,7 +118,7 @@ fn main() {
             }
 
             let now = Instant::now();
-            match command(&filepath.unwrap().path()) {
+            match command(&filepath.path()) {
               Ok([part1, part2]) => {
                 let duration = now.elapsed().as_micros();
                 total_time += duration;
