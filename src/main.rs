@@ -1,4 +1,5 @@
 // #![deny(warnings)]
+
 use clap::Parser;
 use std::path::Path;
 use std::time::Instant;
@@ -49,19 +50,21 @@ fn main() {
   if input_path.is_file() {
     println!("{}", input_path.display());
     for (name, command) in register.into_iter() {
-      if match args.filter_inclusion.clone() {
-        None => false,
-        Some(string) => !name.contains(&string),
-      } {
-        continue;
-      };
+      // using if let ... && name.contains(...) is not yet ready : https://github.com/rust-lang/rust/issues/53667
+      // same for is_some_and https://github.com/rust-lang/rust/issues/93050
+      if let Some(filter) = args.filter_inclusion.clone() {
+        if !name.contains(&filter) {
+          continue;
+        }
+      }
 
-      if match args.filter_exclusion.clone() {
-        None => false,
-        Some(string) => name.contains(&string),
-      } {
-        continue;
-      };
+      // using if let ... && name.contains(...) is not yet ready : https://github.com/rust-lang/rust/issues/53667
+      // same for is_some_and https://github.com/rust-lang/rust/issues/93050
+      if let Some(filter) = args.filter_exclusion.clone() {
+        if name.contains(&filter) {
+          continue;
+        }
+      }
 
       let now = Instant::now();
       match command(input_path) {
