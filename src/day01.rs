@@ -1,8 +1,9 @@
-use std::io::Error;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
-pub fn day01(filename: &Path) -> Result<[u64; 2], Error> {
+use crate::Result;
+
+pub fn day01(filename: &Path) -> Result<[u64; 2]> {
   // Placeholder with the 2021 day 01 solution
 
   let input = std::fs::File::open(filename)?;
@@ -11,7 +12,7 @@ pub fn day01(filename: &Path) -> Result<[u64; 2], Error> {
 
   let mut input_puzzle = Vec::new();
   for line in buffered.lines() {
-    let value: u16 = line.unwrap().parse().unwrap();
+    let value: u16 = line?.parse()?;
     input_puzzle.push(value);
   }
 
@@ -39,7 +40,7 @@ pub fn day01(filename: &Path) -> Result<[u64; 2], Error> {
   Ok([part1, part2])
 }
 
-pub fn day01functional(filename: &Path) -> Result<[u64; 2], Error> {
+pub fn day01functional(filename: &Path) -> Result<[u64; 2]> {
   let input_puzzle = std::fs::read_to_string(filename)
     .expect("File not found!")
     .lines()

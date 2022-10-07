@@ -12,6 +12,10 @@ mod day01;
 #[cfg(test)]
 mod test_helper;
 
+type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
+type CommandFunction = fn(&Path) -> Result<[u64; 2]>;
+
+
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -27,12 +31,13 @@ struct Args {
   filter_exclusion: Option<String>,
 }
 
+
 #[macro_export]
 macro_rules! register_command {
     ( $( $func:expr),+ ) => {
         {
           // Intermediate variable to force type. otherwise function type is not generic
-          let reg: Vec<(&str, fn(&Path) -> Result<[u64; 2], std::io::Error>)> = vec![
+          let reg: Vec<(&str, CommandFunction)> = vec![
             $((stringify!($func), $func),)*
           ];
           reg
@@ -40,7 +45,31 @@ macro_rules! register_command {
     };
 }
 
+
+fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &str) -> Option<u128> {
+  let now = Instant::now();
+  match command(filepath) {
+    Ok([part1, part2]) => {
+      let duration = now.elapsed().as_micros();
+      println!(
+        "{: <30} in {:>7.2} ms : part1={:<10} part2={:<10}",
+        name,
+        duration as f32 / 1000.,
+        part1,
+        part2
+      );
+      Some(duration)
+    }
+    Err(e) => {
+      eprintln!("Error: in {}: {}", name, e);
+      None
+    }
+  }
+}
+
 fn main() {
+  let register = register_command!(day01::day01, day01::day01functional);
+
   let args = Args::parse();
   let input_filename = args.input.unwrap_or(String::from("data"));
   let input_path = Path::new(&input_filename);
@@ -50,11 +79,9 @@ fn main() {
     return;
   }
 
-  let register = register_command!(day01::day01, day01::day01functional);
-
   let mut total_time = 0u128;
 
-  // Apply commands to given files
+  // Apply commands to given file
   if input_path.is_file() {
     println!("{}", input_path.display());
     for (name, command) in register.iter() {
@@ -66,21 +93,10 @@ fn main() {
         continue;
       }
 
-      let now = Instant::now();
-      match command(input_path) {
-        Ok([part1, part2]) => {
-          let duration = now.elapsed().as_micros();
-          total_time += duration;
-          println!(
-            "{: <30} in {:>7.2} ms : part1={:<10} part2={:<10}",
-            name,
-            duration as f32 / 1000.,
-            part1,
-            part2
-          )
-        }
-        Err(msg) => eprintln!("Error: in {}: {}", name, msg),
-      };
+      if let Some(duration) = measure_command_execution(command, input_path, name) {
+        total_time += duration;
+      }
+
     }
   }
 
@@ -93,6 +109,7 @@ fn main() {
     let re = Regex::new(r"(day\d{2})").expect("Failed to parse regex");
 
     for (name, command) in register.iter() {
+
       if let Some(filter) = args.filter_inclusion.clone() && !name.contains(&filter) {
         continue;
       }
@@ -118,21 +135,9 @@ fn main() {
             Some(filepath)
           })
           .for_each(|filepath| {
-            let now = Instant::now();
-            match command(&filepath.path()) {
-              Ok([part1, part2]) => {
-                let duration = now.elapsed().as_micros();
-                total_time += duration;
-                println!(
-                  "{: <30} in {:>7.2} ms : part1={:<10} part2={:<10}",
-                  name,
-                  duration as f32 / 1000.,
-                  part1,
-                  part2
-                )
-              }
-              Err(msg) => eprintln!("Error: in {}: {}", name, msg),
-            };
+            if let Some(duration) = measure_command_execution(command, &filepath.path(), name) {
+              total_time += duration;
+            }
           });
       }
     }

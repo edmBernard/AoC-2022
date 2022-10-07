@@ -11,7 +11,7 @@ macro_rules! add_test {
     $(
         $crate::test_helper::paste::paste! {
             #[test]
-            fn [<$name $func>]() -> Result<(), std::io::Error> {
+            fn [<$name $func>]() -> $crate::Result<()> {
                 assert_eq!($value, $func(Path::new($filename))?);
                 Ok(())
             }
