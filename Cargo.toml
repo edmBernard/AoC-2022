@@ -9,3 +9,4 @@ authors = ["edmbernard <bernard.erwan@gmail.com>"]
 [dependencies]
 clap = { version = "3.2.22", features = ["derive"] }
 paste = "1.0.9"
+regex = "1.6.0"
