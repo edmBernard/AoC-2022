@@ -69,8 +69,9 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    test1:  day01, "data/day01_test1.txt", [7, 5];
-    test2:  day01, "data/day01_test1.txt", [7, 5];
-    main:   day01, "data/day01_test1.txt", [7, 5];
+    test1:            day01, "data/input_day01_test1.txt",            [7, 5];
+    main:             day01, "data/input_day01.txt",                  [1233, 1275];
+    test1_functional: day01functional, "data/input_day01_test1.txt",  [7, 5];
+    main_functional:  day01functional, "data/input_day01.txt",        [1233, 1275];
   );
 }

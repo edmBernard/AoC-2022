@@ -1,5 +1,4 @@
 // #![deny(warnings)]
-#![feature(let_chains)]
 
 use clap::Parser;
 use regex::Regex;
@@ -14,7 +13,6 @@ mod test_helper;
 
 type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
 type CommandFunction = fn(&Path) -> Result<[u64; 2]>;
-
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -31,7 +29,6 @@ struct Args {
   filter_exclusion: Option<String>,
 }
 
-
 #[macro_export]
 macro_rules! register_command {
     ( $( $func:expr),+ ) => {
@@ -44,7 +41,6 @@ macro_rules! register_command {
         }
     };
 }
-
 
 fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &str) -> Option<u128> {
   let now = Instant::now();
@@ -83,20 +79,23 @@ fn main() {
 
   // Apply commands to given file
   if input_path.is_file() {
-    println!("{}", input_path.display());
     for (name, command) in register.iter() {
-      if let Some(filter) = args.filter_inclusion.clone() && !name.contains(&filter) {
-        continue;
+
+      if let Some(filter) = args.filter_inclusion.clone() {
+        if !name.contains(&filter) {
+          continue;
+        }
       }
 
-      if let Some(filter) = args.filter_exclusion.clone() && name.contains(&filter) {
-        continue;
+      if let Some(filter) = args.filter_exclusion.clone() {
+        if name.contains(&filter) {
+          continue;
+        }
       }
 
       if let Some(duration) = measure_command_execution(command, input_path, name) {
         total_time += duration;
       }
-
     }
   }
 
@@ -110,12 +109,16 @@ fn main() {
 
     for (name, command) in register.iter() {
 
-      if let Some(filter) = args.filter_inclusion.clone() && !name.contains(&filter) {
-        continue;
+      if let Some(filter) = args.filter_inclusion.clone() {
+        if !name.contains(&filter) {
+          continue;
+        }
       }
 
-      if let Some(filter) = args.filter_exclusion.clone() && name.contains(&filter) {
-        continue;
+      if let Some(filter) = args.filter_exclusion.clone() {
+        if name.contains(&filter) {
+          continue;
+        }
       }
 
       // Iteration on files in directory
@@ -125,7 +128,7 @@ fn main() {
             let filepath = filepath_result.ok()?;
             let filename = filepath.file_name();
             let caps = re.captures(filename.to_str()?)?;
-            let captured = caps.get(1).map_or("", |m| m.as_str()).to_owned();
+            let captured = caps.get(1).map_or("", |m| m.as_str());
             if captured.is_empty() {
               return None;
             }
