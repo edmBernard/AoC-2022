@@ -6,6 +6,14 @@
 // I don't find another way to better do that.
 pub extern crate paste;
 
+/// Macro to add test given an input filename and expected value for part1 and part2
+/// # Example
+/// ```
+///   add_test!(
+///     test1:  day01, "data/day01_test1.txt", [7, 5];
+///     test2:  day01, "data/day01_test1.txt", [7, 5];
+///   );
+/// ```
 macro_rules! add_test {
     ($($name:ident: $func:ident, $filename:expr, $value:expr;)*) => {
     $(

@@ -3,8 +3,8 @@ use std::path::Path;
 
 use crate::Result;
 
+/// Placeholder with the 2021 day 01 solution
 pub fn day01(filename: &Path) -> Result<[u64; 2]> {
-  // Placeholder with the 2021 day 01 solution
 
   let input = std::fs::File::open(filename)?;
 
@@ -40,6 +40,7 @@ pub fn day01(filename: &Path) -> Result<[u64; 2]> {
   Ok([part1, part2])
 }
 
+/// Placeholder with the 2021 day 01 solution using a more functionnal style
 pub fn day01functional(filename: &Path) -> Result<[u64; 2]> {
   let input_puzzle = std::fs::read_to_string(filename)
     .expect("File not found!")

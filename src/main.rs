@@ -11,8 +11,13 @@ mod day01;
 #[cfg(test)]
 mod test_helper;
 
+#[doc(hidden)]
 type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
-type CommandFunction = fn(&Path) -> Result<[u64; 2]>;
+
+/// Command signature
+/// # Argument
+/// * `filename` - filename containing problem input
+type CommandFunction = fn(filename: &Path) -> Result<[u64; 2]>;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -29,6 +34,13 @@ struct Args {
   filter_exclusion: Option<String>,
 }
 
+/// Macro to register command with
+/// # Arguments
+/// * `func` - function that take file and output part1 and part2 result
+/// # Example
+/// ```
+/// let register = register_command!(day01::day01, day01::day01functional);
+/// ```
 #[macro_export]
 macro_rules! register_command {
     ( $( $func:expr),+ ) => {
@@ -42,6 +54,11 @@ macro_rules! register_command {
     };
 }
 
+/// Launch and time the command execution
+/// # Arguments
+/// * `command` - command to execute
+/// * `filepath` - filename passed to the command function
+/// * `name` - name of the command
 fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &str) -> Option<u128> {
   let now = Instant::now();
   match command(filepath) {
