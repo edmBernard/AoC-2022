@@ -85,6 +85,7 @@ fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &
 fn main() {
   let register = register_command!(
     day01::day01,
+    day01::day01_speed,
     day02::day02
     // day01::day01functional,
     // day26::day26
