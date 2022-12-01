@@ -20,7 +20,7 @@ standalone < input.txt
 ### Build
 
 ```
-clang++ standalone.cpp -o standalone
+clang++ standalone.cpp -std=c++20 -o standalone
 ```
 It will generate the executable `standalone`
 
