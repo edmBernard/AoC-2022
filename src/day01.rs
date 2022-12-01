@@ -39,8 +39,6 @@ pub fn day01(filename: &Path) -> Result<[u64; 2]> {
 }
 
 
-// I don't understand why it's so slow to just do this
-// I test a cpp implementation it is 2 times faster, I'll have to profile this code
 pub fn day01_speed(filename: &Path) -> Result<[u64; 2]> {
 
   let mut input_puzzle = Vec::new();
