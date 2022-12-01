@@ -1,19 +1,15 @@
 // #![allow(unused_variables)]
 
-use std::io::{BufRead, BufReader};
 use std::path::Path;
 
 use crate::Result;
 
 pub fn day01(filename: &Path) -> Result<[u64; 2]> {
-  let input = std::fs::File::open(filename)?;
-
-  let buffered = BufReader::new(input);
 
   let mut input_puzzle = Vec::new();
   let mut one_elf = Vec::new();
-  for line in buffered.lines() {
-    let line_str = line?;
+  for line in std::fs::read_to_string(filename)?.lines() {
+    let line_str = line;
     if line_str.is_empty() {
       input_puzzle.push(one_elf.clone());
       one_elf.clear();
@@ -44,15 +40,13 @@ pub fn day01(filename: &Path) -> Result<[u64; 2]> {
 
 
 // I don't understand why it's so slow to just do this
+// I test a cpp implementation it is 2 times faster, I'll have to profile this code
 pub fn day01_speed(filename: &Path) -> Result<[u64; 2]> {
-  let input = std::fs::File::open(filename)?;
-
-  let buffered = BufReader::new(input);
 
   let mut input_puzzle = Vec::new();
   let mut one_elf = 0;
-  for line in buffered.lines() {
-    let line_str = line?;
+  for line in std::fs::read_to_string(filename)?.lines() {
+    let line_str = line;
     if line_str.is_empty() {
       input_puzzle.push(one_elf);
       one_elf = 0;
