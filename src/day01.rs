@@ -1,3 +1,5 @@
+// #![allow(unused_variables)]
+
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
@@ -5,60 +7,38 @@ use crate::Result;
 
 /// Placeholder with the 2021 day 01 solution
 pub fn day01(filename: &Path) -> Result<[u64; 2]> {
-
   let input = std::fs::File::open(filename)?;
 
   let buffered = BufReader::new(input);
 
   let mut input_puzzle = Vec::new();
+  let mut one_elf = Vec::new();
   for line in buffered.lines() {
-    let value: u16 = line?.parse()?;
-    input_puzzle.push(value);
-  }
-
-  // part1
-  let mut part1: u64 = 0;
-  let mut previous = input_puzzle[0];
-  for &depth in &input_puzzle {
-    if depth > previous {
-      part1 += 1
+    let line_str = line?;
+    if line_str.is_empty() {
+      input_puzzle.push(one_elf.clone());
+      one_elf.clear();
+      continue;
     }
-    previous = depth;
+    let value = line_str.parse()?;
+    one_elf.push(value);
+  }
+  // Push last elf inventory if the puzzle don't end with new line
+  if !one_elf.is_empty() {
+    input_puzzle.push(one_elf);
   }
 
-  // part2
-  let mut part2: u64 = 0;
-  let mut previous = input_puzzle[0] + input_puzzle[1] + input_puzzle[2];
-  for idx in 2..input_puzzle.len() {
-    let sum = input_puzzle[idx] + input_puzzle[idx - 1] + input_puzzle[idx - 2];
-    if sum > previous {
-      part2 += 1
-    }
-    previous = sum;
-  }
-
-  Ok([part1, part2])
-}
-
-/// Placeholder with the 2021 day 01 solution using a more functionnal style
-pub fn day01functional(filename: &Path) -> Result<[u64; 2]> {
-  let input_puzzle = std::fs::read_to_string(filename)
-    .expect("File not found!")
-    .lines()
-    .map(|x| x.parse::<u16>().unwrap())
+  let mut prep_puzzle: Vec<u64> = input_puzzle.iter()
+    .map(|one_elf| one_elf.iter().sum())
     .collect::<Vec<_>>();
+  prep_puzzle.sort();
+  prep_puzzle.reverse();
 
   // part1
-  let part1: u64 = input_puzzle.windows(2).filter(|pair| pair[0] < pair[1]).count() as u64;
+  let part1: u64 = prep_puzzle[0];
 
   // part2
-  let part2: u64 = input_puzzle
-    .windows(3)
-    .map(|triplet| triplet.into_iter().sum())
-    .collect::<Vec<u16>>()
-    .windows(2)
-    .filter(|pair| pair[0] < pair[1])
-    .count() as u64;
+  let part2: u64 = prep_puzzle[0..3].iter().sum();
 
   Ok([part1, part2])
 }
@@ -70,9 +50,7 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    test1:            day01, "data/input_day01_test1.txt",            [7, 5];
-    main:             day01, "data/input_day01.txt",                  [1233, 1275];
-    test1_functional: day01functional, "data/input_day01_test1.txt",  [7, 5];
-    main_functional:  day01functional, "data/input_day01.txt",        [1233, 1275];
+    main:   day01, "data/day01.txt",                  [70720, 207148];
+    test1:  day01, "data/day01_test1.txt",            [24000, 45000];
   );
 }

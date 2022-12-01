@@ -7,6 +7,7 @@ use std::path::Path;
 use std::time::Instant;
 
 mod day01;
+// mod day26;
 
 #[cfg(test)]
 mod test_helper;
@@ -81,7 +82,11 @@ fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &
 }
 
 fn main() {
-  let register = register_command!(day01::day01, day01::day01functional);
+  let register = register_command!(
+    day01::day01
+    // day01::day01functional,
+    // day26::day26
+  );
 
   let args = Args::parse();
   let input_filename = args.input.unwrap_or(String::from("data"));
