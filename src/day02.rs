@@ -5,7 +5,7 @@ use std::path::Path;
 
 use crate::Result;
 
-pub fn day01(filename: &Path) -> Result<[u64; 2]> {
+pub fn day02(filename: &Path) -> Result<[u64; 2]> {
   let input = std::fs::File::open(filename)?;
 
   let buffered = BufReader::new(input);
@@ -49,7 +49,7 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    main:   day01, "data/day01.txt",                  [70720, 207148];
-    test1:  day01, "data/day01_test1.txt",            [24000, 45000];
+    main:   day02, "data/day02.txt",                  [70720, 207148];
+    test1:  day02, "data/day02_test1.txt",            [24000, 45000];
   );
 }

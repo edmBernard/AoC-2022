@@ -7,6 +7,7 @@ use std::path::Path;
 use std::time::Instant;
 
 mod day01;
+mod day02;
 // mod day26;
 
 #[cfg(test)]
@@ -83,7 +84,8 @@ fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &
 
 fn main() {
   let register = register_command!(
-    day01::day01
+    day01::day01,
+    day02::day02
     // day01::day01functional,
     // day26::day26
   );

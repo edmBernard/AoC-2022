@@ -19,3 +19,4 @@ The executable is named `AoC-2022`. Inputs path can be specified as argument or 
 | Day | Description | Tips |
 |--|--|--|
 | Day01 | - | - |
+| Day02 | - | - |
