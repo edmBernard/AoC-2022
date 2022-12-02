@@ -8,6 +8,7 @@ use std::time::Instant;
 
 mod day01;
 mod day02;
+mod day03;
 // mod day26;
 
 #[cfg(test)]
@@ -63,6 +64,9 @@ macro_rules! register_command {
 /// * `name` - name of the command
 fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &str) -> Option<u128> {
   let now = Instant::now();
+  for _ in 0..10000 {
+    _ = command(filepath);
+  }
   match command(filepath) {
     Ok([part1, part2]) => {
       let duration = now.elapsed().as_micros();
@@ -86,7 +90,9 @@ fn main() {
   let register = register_command!(
     day01::day01,
     day01::day01_speed,
-    day02::day02
+    day02::day02,
+    day02::day02_speed,
+    day03::day03
     // day01::day01functional,
     // day26::day26
   );
