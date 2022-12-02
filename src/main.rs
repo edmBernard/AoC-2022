@@ -9,7 +9,6 @@ use std::time::Instant;
 mod day01;
 mod day02;
 mod day03;
-// mod day26;
 
 #[cfg(test)]
 mod test_helper;
@@ -93,8 +92,6 @@ fn main() {
     day02::day02,
     day02::day02_speed,
     day03::day03
-    // day01::day01functional,
-    // day26::day26
   );
 
   let args = Args::parse();

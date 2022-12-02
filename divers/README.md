@@ -12,7 +12,7 @@ It will generate the executable `standalone`, see : [rustc](https://doc.rust-lan
 ### Run
 
 ```
-standalone < input.txt
+./standalone < input.txt
 ```
 
 ## C++ (clang)
@@ -27,7 +27,7 @@ It will generate the executable `standalone`
 ### Run
 
 ```
-standalone < input.txt
+./standalone < input.txt
 ```
 
 ## Fortran
@@ -43,7 +43,7 @@ It will generate the executable `standalone`
 ### Run
 
 ```
-standalone < input.txt
+./standalone < input.txt
 ```
 
 ## Python

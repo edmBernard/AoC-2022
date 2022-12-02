@@ -12,6 +12,19 @@ cd AoC-2022
 cargo build --release
 ```
 
+## Run
+
+```bash
+cargo run -- data
+```
+
+## Test
+
+Run each part and expect result to be from my input
+```bash
+cargo test
+```
+
 The executable is named `AoC-2022`. Inputs path can be specified as argument or by default in the data folder.
 
 ## Problem
@@ -20,3 +33,4 @@ The executable is named `AoC-2022`. Inputs path can be specified as argument or 
 |--|--|--|
 | Day01 | - | - |
 | Day02 | - | - |
+| Day03 | - | - |

@@ -1,1 +1,4 @@
-/standalone
+/standalone*
+!*.cpp
+!*.rs
+!*.py
