@@ -35,6 +35,12 @@ std::string ReadToString(const std::string &filename) {
   return input_raw;
 }
 
+// Iterator on a string splitted by a delimiter (default:'\n')
+// Usage:
+//   - range loop :
+//       for (auto line : IteratorOnLines(input_raw)) {
+//   - vector initialization :
+//       std::vector<std::string_view>(IteratorOnLines(input_raw).begin(), IteratorOnLines(input_raw).end())
 class IteratorOnLines {
 
 public:
@@ -44,9 +50,9 @@ public:
   using pointer = value_type;
   using reference = value_type &;
 
-  IteratorOnLines(std::string_view input_raw)
-      : input_raw(input_raw) {
-    next = input_raw.find('\n', start);
+  IteratorOnLines(std::string_view input_raw, const char delimiter = '\n')
+      : input_raw(input_raw), delimiter(delimiter) {
+    next = input_raw.find(delimiter, start);
     line = std::string_view{input_raw.data() + start, next - start};
   }
 
@@ -60,7 +66,7 @@ public:
 
   IteratorOnLines &operator++() {
     start = ++next;
-    next = input_raw.find('\n', start);
+    next = input_raw.find(delimiter, start);
     line = std::string_view{input_raw.data() + start, next - start};
     return *this;
   }
@@ -77,6 +83,7 @@ public:
 
 private:
   std::string_view input_raw;
+  char delimiter;
   // We have to store the current line otherwise we can't give it as a reference
   std::string_view line;
   size_t start = 0;
