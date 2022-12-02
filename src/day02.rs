@@ -25,6 +25,7 @@ impl InterpreteToInt for &str {
 }
 
 impl InterpreteToInt for char {
+  #[inline(always)]
   fn interprete(&self) -> Result<u64> {
     match self {
       'A' => Ok(0),
@@ -38,12 +39,14 @@ impl InterpreteToInt for char {
   }
 }
 
+#[inline(always)]
 fn result_part1(opponent_choice: u64, my_choice: u64) -> Result<u64> {
   // I add +3 because I use unsigned integer and I don't want to have negative after substraction
   let outcome_score = (((my_choice + 1) + 3 - (opponent_choice + 1) + 1) % 3) * 3;
   Ok((my_choice+1) + outcome_score)
 }
 
+#[inline(always)]
 fn result_part2(opponent_choice: u64, outcome: u64) -> Result<u64> {
   // 0 means you need to lose, 1 means you need to end the round in a draw, and 2 means you need to win
   // I add +3 because I use unsigned integer and I don't want to have negative after substraction
