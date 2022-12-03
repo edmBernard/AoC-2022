@@ -88,7 +88,7 @@ mod tests {
   add_test!(
     main:   day03, "data/day03.txt",                  [8202, 2864];
     test1:  day03, "data/day03_test1.txt",            [157, 70];
-    main:   day03_speed, "data/day03.txt",                  [8202, 2864];
-    test1:  day03_speed, "data/day03_test1.txt",            [157, 70];
+    main:   day03_speed, "data/day03.txt",            [8202, 2864];
+    test1:  day03_speed, "data/day03_test1.txt",      [157, 70];
   );
 }
