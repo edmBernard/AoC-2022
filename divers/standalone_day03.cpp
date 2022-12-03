@@ -90,24 +90,19 @@ private:
   size_t next = 0;
 };
 
-
 inline uint64_t Interprete(char letter) {
-  switch (letter) {
-    case 'A': return 0;
-    case 'B': return 1;
-    case 'C': return 2;
-    case 'X': return 0;
-    case 'Y': return 1;
-    case 'Z': return 2;
-    default:
-      throw std::runtime_error("Invalid letter");
+  // 'A' -> 65
+  // 'a' -> 97
+  const int capital = letter - 'A';
+  if (capital <= 26) {
+    return capital + 27;
   }
+  return letter - 'a' + 1;
 }
 
 } // namespace
 
-
-// ./standalonecpp ../data/day02.txt
+// ./standalonecpp ../data/day03.txt
 // We read the whole file in a string
 // We use an iterator implementation that was a bit tricky/ugly
 // but we have a nice syntaxe and full speed
@@ -125,25 +120,36 @@ int main_speed_iter(int argc, char *argv[]) {
 
     part1 = 0;
     part2 = 0;
-    std::vector<uint64_t> input_puzzle;
-    uint64_t value = 0;
 
     // Reading directly the whole file and parsing each line is faster than getline+parsing
-    size_t parsed = 0;
+    std::vector<std::string_view> chunk;
     for (auto line : IteratorOnLines(input_raw)) {
-      const uint64_t opponent_choice = Interprete(line[0]);
-      const uint64_t second_argument = Interprete(line[2]);
-      // part1
-      const uint64_t my_choice = second_argument;
-      const uint64_t outcome_score = (((my_choice + 1) + 3 - (opponent_choice + 1) + 1) % 3) * 3;
-      part1 += (my_choice+1) + outcome_score;
-      // part2
-      const uint64_t outcome = second_argument;
-      const uint64_t choice_score = ((opponent_choice + outcome + 3 - 1) % 3) + 1;
-      part2 += choice_score + outcome * 3;
-    };
 
+      // part1
+      const size_t compartments_size = line.size() / 2;
+      const auto compartments1 = line.substr(0, compartments_size);
+      const auto compartments2 = line.substr(compartments_size, compartments_size);
+      for (auto elem1 : compartments1) {
+        if (compartments2.find(elem1) != std::string_view::npos) {
+          part1 += Interprete(elem1);
+          break;
+        };
+      }
+
+      // part2
+      chunk.push_back(line);
+      if (chunk.size() == 3) {
+        for (auto elem1 : chunk[0]) {
+          if (chunk[1].find(elem1) != std::string_view::npos && chunk[2].find(elem1) != std::string_view::npos) {
+            part2 += Interprete(elem1);
+            break;
+          }
+        }
+        chunk.clear();
+      }
+    }
   }
+
   std::cout << "part1: " << part1 << "\n";
   std::cout << "part2: " << part2 << "\n";
 

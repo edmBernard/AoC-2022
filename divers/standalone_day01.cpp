@@ -250,7 +250,7 @@ int main_speed_iter(int argc, char *argv[]) {
   std::cout << "part2: " << part2 << "\n";
 
   std::chrono::duration<double, std::milli> elapsed_temp = std::chrono::high_resolution_clock::now() - start_temp;
-  std::cout << "total duration: " << elapsed_temp.count() << "ms \n";
+  std::cout << "total duration: " << elapsed_temp.count() << "ms" << std::endl;
 
   return 0;
 }
