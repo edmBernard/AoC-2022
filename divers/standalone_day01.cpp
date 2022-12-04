@@ -144,11 +144,9 @@ int main_regular(int argc, char *argv[]) {
     part1 = input_puzzle[input_puzzle.size() - 1];
     part2 = std::reduce(input_puzzle.begin() + input_puzzle.size() - 3, input_puzzle.end());
   }
-  std::cout << "part1: " << part1 << "\n";
-  std::cout << "part2: " << part2 << "\n";
 
   std::chrono::duration<double, std::milli> elapsed_temp = std::chrono::high_resolution_clock::now() - start_temp;
-  std::cout << "total duration: " << elapsed_temp.count() << "ms \n";
+  std::cout << "day01_regular \tin " << elapsed_temp.count() << " ms : part1=" << part1 << " \tpart2=" << part2 << std::endl;
 
   return 0;
 }
@@ -200,11 +198,10 @@ int main_speed_raw(int argc, char *argv[]) {
     part1 = input_puzzle[input_puzzle.size() - 1];
     part2 = std::reduce(input_puzzle.begin() + input_puzzle.size() - 3, input_puzzle.end());
   }
-  std::cout << "part1: " << part1 << "\n";
-  std::cout << "part2: " << part2 << "\n";
 
   std::chrono::duration<double, std::milli> elapsed_temp = std::chrono::high_resolution_clock::now() - start_temp;
-  std::cout << "total duration: " << elapsed_temp.count() << "ms \n";
+  std::cout << "day01_speed_raw \tin " << elapsed_temp.count() << " ms : part1=" << part1 << " \tpart2=" << part2 << std::endl;
+
 
   return 0;
 }
@@ -246,11 +243,9 @@ int main_speed_iter(int argc, char *argv[]) {
     part1 = input_puzzle[input_puzzle.size() - 1];
     part2 = std::reduce(input_puzzle.begin() + input_puzzle.size() - 3, input_puzzle.end());
   }
-  std::cout << "part1: " << part1 << "\n";
-  std::cout << "part2: " << part2 << "\n";
 
   std::chrono::duration<double, std::milli> elapsed_temp = std::chrono::high_resolution_clock::now() - start_temp;
-  std::cout << "total duration: " << elapsed_temp.count() << "ms" << std::endl;
+  std::cout << "day01_speed_iter \tin " << elapsed_temp.count() << " ms : part1=" << part1 << " \tpart2=" << part2 << std::endl;
 
   return 0;
 }

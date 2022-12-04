@@ -150,11 +150,8 @@ int main_speed_iter(int argc, char *argv[]) {
     }
   }
 
-  std::cout << "part1: " << part1 << "\n";
-  std::cout << "part2: " << part2 << "\n";
-
   std::chrono::duration<double, std::milli> elapsed_temp = std::chrono::high_resolution_clock::now() - start_temp;
-  std::cout << "total duration: " << elapsed_temp.count() << "ms" << std::endl;
+  std::cout << "day03 \t\t\tin " << elapsed_temp.count() << " ms : part1=" << part1 << " \tpart2=" << part2 << std::endl;
 
   return 0;
 }
