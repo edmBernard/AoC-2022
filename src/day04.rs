@@ -3,47 +3,45 @@ use std::path::Path;
 
 use crate::Result;
 
-fn to_priority(item: char) -> u32 {
-  if item.is_lowercase() {
-    item as u32 - 'a' as u32 + 1
-  } else {
-    item as u32 - 'A' as u32 + 27
-  }
-}
-
 pub fn day04(filename: &Path) -> Result<[u64; 2]> {
   let file_content = std::fs::read_to_string(filename)?;
   let part1 = file_content
     .lines()
     .map(|line| {
-      let compartments_size = line.len() / 2;
-      let compartments1 = &line[..compartments_size];
-      let compartments2 = &line[compartments_size..];
-      for elem1 in compartments1.chars() {
-        if compartments2.contains(elem1) {
-          return to_priority(elem1) as u64;
-        };
+      let indexes: Vec<&str> = line.split(&['-', ',']).collect();
+      let min_efl1 = indexes[0].parse::<u32>().unwrap_or(0);
+      let max_efl1 = indexes[1].parse::<u32>().unwrap_or(0);
+      let min_efl2 = indexes[2].parse::<u32>().unwrap_or(0);
+      let max_efl2 = indexes[3].parse::<u32>().unwrap_or(0);
+      if min_efl1 <= min_efl2 && max_efl1 >= max_efl2 {
+        1
+      } else if min_efl2 <= min_efl1 && max_efl2 >= max_efl1 {
+        1
+      } else {
+        0
       }
-      0
     })
     .sum();
   let part2 = file_content
     .lines()
-    .collect::<Vec<_>>()
-    .chunks(3)
-    .map(|elfs_group| {
-      for elem1 in elfs_group[0].chars() {
-        if elfs_group[1].contains(elem1) && elfs_group[2].contains(elem1) {
-          return to_priority(elem1) as u64;
-        };
+    .map(|line| {
+      let indexes: Vec<&str> = line.split(&['-', ',']).collect();
+      let min_efl1 = indexes[0].parse::<u32>().unwrap_or(0);
+      let max_efl1 = indexes[1].parse::<u32>().unwrap_or(0);
+      let min_efl2 = indexes[2].parse::<u32>().unwrap_or(0);
+      let max_efl2 = indexes[3].parse::<u32>().unwrap_or(0);
+      if min_efl1 <= min_efl2 && max_efl1 >= min_efl2 {
+        1
+      } else if min_efl2 <= min_efl1 && max_efl2 >= min_efl1 {
+        1
+      } else {
+        0
       }
-      0
     })
     .sum();
 
   Ok([part1, part2])
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -52,7 +50,7 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    main:   day04, "data/day04.txt",                  [8202, 2864];
-    test1:  day04, "data/day04_test1.txt",            [157, 70];
+    main:   day04, "data/day04.txt",           [490, 921];
+    test1:  day04, "data/day04_test1.txt",     [2, 4];
   );
 }
