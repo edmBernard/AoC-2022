@@ -9,13 +9,13 @@ pub fn day04(filename: &Path) -> Result<[u64; 2]> {
     .lines()
     .map(|line| {
       let indexes: Vec<&str> = line.split(&['-', ',']).collect();
-      let min_efl1 = indexes[0].parse::<u32>().unwrap_or(0);
-      let max_efl1 = indexes[1].parse::<u32>().unwrap_or(0);
-      let min_efl2 = indexes[2].parse::<u32>().unwrap_or(0);
-      let max_efl2 = indexes[3].parse::<u32>().unwrap_or(0);
-      if min_efl1 <= min_efl2 && max_efl1 >= max_efl2 {
+      let min_elf1 = indexes[0].parse::<u32>().unwrap_or(0);
+      let max_elf1 = indexes[1].parse::<u32>().unwrap_or(0);
+      let min_elf2 = indexes[2].parse::<u32>().unwrap_or(0);
+      let max_elf2 = indexes[3].parse::<u32>().unwrap_or(0);
+      if min_elf1 <= min_elf2 && max_elf1 >= max_elf2 {
         1
-      } else if min_efl2 <= min_efl1 && max_efl2 >= max_efl1 {
+      } else if min_elf2 <= min_elf1 && max_elf2 >= max_elf1 {
         1
       } else {
         0
@@ -26,13 +26,13 @@ pub fn day04(filename: &Path) -> Result<[u64; 2]> {
     .lines()
     .map(|line| {
       let indexes: Vec<&str> = line.split(&['-', ',']).collect();
-      let min_efl1 = indexes[0].parse::<u32>().unwrap_or(0);
-      let max_efl1 = indexes[1].parse::<u32>().unwrap_or(0);
-      let min_efl2 = indexes[2].parse::<u32>().unwrap_or(0);
-      let max_efl2 = indexes[3].parse::<u32>().unwrap_or(0);
-      if min_efl1 <= min_efl2 && max_efl1 >= min_efl2 {
+      let min_elf1 = indexes[0].parse::<u32>().unwrap_or(0);
+      let max_elf1 = indexes[1].parse::<u32>().unwrap_or(0);
+      let min_elf2 = indexes[2].parse::<u32>().unwrap_or(0);
+      let max_elf2 = indexes[3].parse::<u32>().unwrap_or(0);
+      if min_elf1 <= min_elf2 && max_elf1 >= min_elf2 {
         1
-      } else if min_efl2 <= min_efl1 && max_efl2 >= min_efl1 {
+      } else if min_elf2 <= min_elf1 && max_elf2 >= min_elf1 {
         1
       } else {
         0
@@ -48,22 +48,22 @@ pub fn day04_speed(filename: &Path) -> Result<[u64; 2]> {
   let mut part2 = 0;
   for line in std::fs::read_to_string(filename)?.lines() {
     let mut iter = line.split(&['-', ',']);
-    let min_efl1 = iter.next().expect("Not enough value").parse::<u32>()?;
-    let max_efl1 = iter.next().expect("Not enough value").parse::<u32>()?;
-    let min_efl2 = iter.next().expect("Not enough value").parse::<u32>()?;
-    let max_efl2 = iter.next().expect("Not enough value").parse::<u32>()?;
+    let min_elf1 = iter.next().expect("Not enough value").parse::<u64>()?;
+    let max_elf1 = iter.next().expect("Not enough value").parse::<u64>()?;
+    let min_elf2 = iter.next().expect("Not enough value").parse::<u64>()?;
+    let max_elf2 = iter.next().expect("Not enough value").parse::<u64>()?;
     // part1
-    part1 += if min_efl1 <= min_efl2 && max_efl1 >= max_efl2 {
+    part1 += if min_elf1 <= min_elf2 && max_elf1 >= max_elf2 {
       1
-    } else if min_efl2 <= min_efl1 && max_efl2 >= max_efl1 {
+    } else if min_elf2 <= min_elf1 && max_elf2 >= max_elf1 {
       1
     } else {
       0
     };
     // part2
-    part2 += if min_efl1 <= min_efl2 && max_efl1 >= min_efl2 {
+    part2 += if min_elf1 <= min_elf2 && max_elf1 >= min_elf2 {
       1
-    } else if min_efl2 <= min_efl1 && max_efl2 >= min_efl1 {
+    } else if min_elf2 <= min_elf1 && max_elf2 >= min_elf1 {
       1
     } else {
       0
