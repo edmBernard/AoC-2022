@@ -43,6 +43,36 @@ pub fn day04(filename: &Path) -> Result<[u64; 2]> {
   Ok([part1, part2])
 }
 
+pub fn day04_speed(filename: &Path) -> Result<[u64; 2]> {
+  let mut part1 = 0;
+  let mut part2 = 0;
+  for line in std::fs::read_to_string(filename)?.lines() {
+    let mut iter = line.split(&['-', ',']);
+    let min_efl1 = iter.next().expect("Not enough value").parse::<u32>()?;
+    let max_efl1 = iter.next().expect("Not enough value").parse::<u32>()?;
+    let min_efl2 = iter.next().expect("Not enough value").parse::<u32>()?;
+    let max_efl2 = iter.next().expect("Not enough value").parse::<u32>()?;
+    // part1
+    part1 += if min_efl1 <= min_efl2 && max_efl1 >= max_efl2 {
+      1
+    } else if min_efl2 <= min_efl1 && max_efl2 >= max_efl1 {
+      1
+    } else {
+      0
+    };
+    // part2
+    part2 += if min_efl1 <= min_efl2 && max_efl1 >= min_efl2 {
+      1
+    } else if min_efl2 <= min_efl1 && max_efl2 >= min_efl1 {
+      1
+    } else {
+      0
+    }
+  }
+
+  Ok([part1, part2])
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -50,7 +80,9 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    main:   day04, "data/day04.txt",           [490, 921];
-    test1:  day04, "data/day04_test1.txt",     [2, 4];
+    main:   day04, "data/day04.txt",              [490, 921];
+    test1:  day04, "data/day04_test1.txt",        [2, 4];
+    main:   day04_speed, "data/day04.txt",        [490, 921];
+    test1:  day04_speed, "data/day04_test1.txt",  [2, 4];
   );
 }
