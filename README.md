@@ -29,12 +29,13 @@ The executable is named `AoC-2022`. Inputs path can be specified as argument or 
 
 ## Problem
 
-| Day | Description | Tips |
-|--|--|--|
-| Day01 | - | - |
-| Day02 | - | - |
-| Day03 | - | - |
-| Day04 | - | - |
+| Day   | Description               | Tips  |
+|--     |--                         |--     |
+| Day01 | Max of range              | -     |
+| Day02 | Rock Paper Scissors       | -     |
+| Day03 | Duplicate in compartments | -     |
+| Day04 | Check range overlapping   | -     |
+| Day05 |                           | -     |
 
 ## Some Timing for `10'000` run :
 
