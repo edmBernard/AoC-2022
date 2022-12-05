@@ -119,12 +119,18 @@ pub fn day05_speed(filename: &Path) -> Result<ReturnType> {
   // Parse and apply movement
   let regex = Regex::new(r"move (\d+) from (\d+) to (\d+)")?;
   for line in content_iterator {
-    let Some(cap)= regex.captures(line) else {
+    if line.is_empty() {
       continue;
-    };
-    let quantity = cap.get(1).ok_or("Fail to capture 1")?.as_str().parse::<u64>()?;
-    let src = cap.get(2).ok_or("Fail to capture 2")?.as_str().parse::<u64>()? - 1;
-    let dst = cap.get(3).ok_or("Fail to capture 3")?.as_str().parse::<u64>()? - 1;
+    }
+    // Movement line are of the form "move (\d+) from (\d+) to (\d+)"
+    let mut splitted = line.split(" ");
+    splitted.next();  // drop "move"
+    let quantity = splitted.next().ok_or("Failed to get quantity")?.parse::<u64>()?;
+    splitted.next();  // drop "from"
+    let src = splitted.next().ok_or("Failed to get src position")?.parse::<u64>()? - 1;
+    splitted.next();  // drop "to"
+    let dst = splitted.next().ok_or("Failed to get src position")?.parse::<u64>()? - 1;
+
     let mut temp_part1 = Vec::new();
     let mut temp_part2 = Vec::new();
     for _ in 0..quantity {

@@ -49,10 +49,10 @@ pub fn day04_speed(filename: &Path) -> Result<ReturnType> {
   let mut part2 = 0;
   for line in std::fs::read_to_string(filename)?.lines() {
     let mut iter = line.split(&['-', ',']);
-    let min_elf1 = iter.next().expect("Not enough value").parse::<u64>()?;
-    let max_elf1 = iter.next().expect("Not enough value").parse::<u64>()?;
-    let min_elf2 = iter.next().expect("Not enough value").parse::<u64>()?;
-    let max_elf2 = iter.next().expect("Not enough value").parse::<u64>()?;
+    let min_elf1 = iter.next().ok_or("Not enough value")?.parse::<u64>()?;
+    let max_elf1 = iter.next().ok_or("Not enough value")?.parse::<u64>()?;
+    let min_elf2 = iter.next().ok_or("Not enough value")?.parse::<u64>()?;
+    let max_elf2 = iter.next().ok_or("Not enough value")?.parse::<u64>()?;
     // part1
     part1 += if min_elf1 <= min_elf2 && max_elf1 >= max_elf2 {
       1
