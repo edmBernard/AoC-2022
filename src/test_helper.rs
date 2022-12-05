@@ -20,7 +20,7 @@ macro_rules! add_test {
         $crate::test_helper::paste::paste! {
             #[test]
             fn [<$name $func>]() -> $crate::Result<()> {
-                assert_eq!($value, $func(Path::new($filename))?);
+                assert_eq!($func(Path::new($filename))?, $value);
                 Ok(())
             }
         }

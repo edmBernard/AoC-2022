@@ -2,6 +2,7 @@
 use std::path::Path;
 
 use crate::Result;
+use crate::utils::ReturnType;
 
 fn to_priority(item: char) -> u32 {
   if item.is_lowercase() {
@@ -11,7 +12,7 @@ fn to_priority(item: char) -> u32 {
   }
 }
 
-pub fn day03(filename: &Path) -> Result<[u64; 2]> {
+pub fn day03(filename: &Path) -> Result<ReturnType> {
   let file_content = std::fs::read_to_string(filename)?;
   let part1 = file_content
     .lines()
@@ -41,10 +42,10 @@ pub fn day03(filename: &Path) -> Result<[u64; 2]> {
     })
     .sum();
 
-  Ok([part1, part2])
-}
+    Ok(ReturnType::Numeric(part1, part2))
+  }
 
-pub fn day03_speed(filename: &Path) -> Result<[u64; 2]> {
+pub fn day03_speed(filename: &Path) -> Result<ReturnType> {
   let mut chunk = Vec::new();
   let mut part1 = 0;
   let mut part2 = 0;
@@ -76,7 +77,7 @@ pub fn day03_speed(filename: &Path) -> Result<[u64; 2]> {
     }
   }
 
-  Ok([part1, part2])
+  Ok(ReturnType::Numeric(part1, part2))
 }
 
 #[cfg(test)]

@@ -3,6 +3,7 @@ use std::path::Path;
 use regex::Regex;
 
 use crate::Result;
+use crate::utils::ReturnType;
 
 enum State {
   ParseHeader,
@@ -10,7 +11,7 @@ enum State {
   ParseMovement
 }
 
-pub fn day05(filename: &Path) -> Result<[u64; 2]> {
+pub fn day05(filename: &Path) -> Result<ReturnType> {
   let file_content = std::fs::read_to_string(filename)?;
   let content_iterator = file_content.lines();
   let mut header = Vec::new();
@@ -66,10 +67,7 @@ pub fn day05(filename: &Path) -> Result<[u64; 2]> {
   }
   let part1 = board_part1.iter().map(|stack| String::from(stack[stack.len()-1])).collect::<Vec<_>>().join("");
   let part2 = board_part2.iter().map(|stack| String::from(stack[stack.len()-1])).collect::<Vec<_>>().join("");
-  // Result of part1 is a string
-  println!("part1 {} expected on test CMZ on real ZWHVFWQWW", part1);
-  println!("part2 {} expected on test MCD on real HZFZCCWWV", part2);
-  Ok([0, 0])
+  Ok(ReturnType::String(part1, part2))
 }
 
 #[cfg(test)]
@@ -79,7 +77,7 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    main:   day05, "data/day05.txt",              [490, 921];
-    test1:  day05, "data/day05_test1.txt",        [2, 4];
+    main:   day05, "data/day05.txt",              ["ZWHVFWQWW", "HZFZCCWWV"];
+    test1:  day05, "data/day05_test1.txt",        ["CMZ", "MCD"];
   );
 }

@@ -6,6 +6,9 @@ use std::fs;
 use std::path::Path;
 use std::time::Instant;
 
+mod utils;
+use utils::ReturnType;
+
 mod day01;
 mod day02;
 mod day03;
@@ -21,7 +24,7 @@ type Result<T> = ::std::result::Result<T, Box<dyn ::std::error::Error>>;
 /// Command signature
 /// # Argument
 /// * `filename` - filename containing problem input
-type CommandFunction = fn(filename: &Path) -> Result<[u64; 2]>;
+type CommandFunction = fn(filename: &Path) -> Result<ReturnType>;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -65,12 +68,16 @@ macro_rules! register_command {
 /// * `name` - name of the command
 fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &str) -> Option<u128> {
   let now = Instant::now();
-  for _ in 0..10000 {
-    _ = command(filepath);
-  }
+  // for _ in 0..10000 {
+  //   _ = command(filepath);
+  // }
   match command(filepath) {
-    Ok([part1, part2]) => {
+    Ok(result) => {
       let duration = now.elapsed().as_micros();
+      let (part1, part2) = match result {
+        ReturnType::Numeric(part1, part2) => (format!("{}", part1), format!("{}", part2)),
+        ReturnType::String(part1, part2) => (format!("{}", part1), format!("{}", part2)),
+      };
       println!(
         "{: <30} in {:>7.2} ms : part1={:<10} part2={:<10}",
         name,

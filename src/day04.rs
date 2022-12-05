@@ -2,8 +2,9 @@
 use std::path::Path;
 
 use crate::Result;
+use crate::utils::ReturnType;
 
-pub fn day04(filename: &Path) -> Result<[u64; 2]> {
+pub fn day04(filename: &Path) -> Result<ReturnType> {
   let file_content = std::fs::read_to_string(filename)?;
   let part1 = file_content
     .lines()
@@ -40,10 +41,10 @@ pub fn day04(filename: &Path) -> Result<[u64; 2]> {
     })
     .sum();
 
-  Ok([part1, part2])
+  Ok(ReturnType::Numeric(part1, part2))
 }
 
-pub fn day04_speed(filename: &Path) -> Result<[u64; 2]> {
+pub fn day04_speed(filename: &Path) -> Result<ReturnType> {
   let mut part1 = 0;
   let mut part2 = 0;
   for line in std::fs::read_to_string(filename)?.lines() {
@@ -70,7 +71,7 @@ pub fn day04_speed(filename: &Path) -> Result<[u64; 2]> {
     }
   }
 
-  Ok([part1, part2])
+  Ok(ReturnType::Numeric(part1, part2))
 }
 
 #[cfg(test)]

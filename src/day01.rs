@@ -3,8 +3,9 @@
 use std::path::Path;
 
 use crate::Result;
+use crate::utils::ReturnType;
 
-pub fn day01(filename: &Path) -> Result<[u64; 2]> {
+pub fn day01(filename: &Path) -> Result<ReturnType> {
 
   let mut input_puzzle = Vec::new();
   let mut one_elf = Vec::new();
@@ -35,11 +36,11 @@ pub fn day01(filename: &Path) -> Result<[u64; 2]> {
   // part2
   let part2: u64 = prep_puzzle[0..3].iter().sum();
 
-  Ok([part1, part2])
+  Ok(ReturnType::Numeric(part1, part2))
 }
 
 
-pub fn day01_speed(filename: &Path) -> Result<[u64; 2]> {
+pub fn day01_speed(filename: &Path) -> Result<ReturnType> {
 
   let mut input_puzzle = Vec::new();
   let mut one_elf = 0;
@@ -67,7 +68,7 @@ pub fn day01_speed(filename: &Path) -> Result<[u64; 2]> {
   // part2
   let part2: u64 = input_puzzle[0..3].iter().sum();
 
-  Ok([part1, part2])
+  Ok(ReturnType::Numeric(part1, part2))
 }
 
 #[cfg(test)]

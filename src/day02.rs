@@ -2,6 +2,7 @@
 use std::path::Path;
 
 use crate::Result;
+use crate::utils::ReturnType;
 
 // A for Rock, B for Paper, and C for Scissors
 // X for Rock, Y for Paper, and Z for Scissors
@@ -54,7 +55,7 @@ fn result_part2(opponent_choice: u64, outcome: u64) -> Result<u64> {
   Ok(choice_score + outcome * 3)
 }
 
-pub fn day02(filename: &Path) -> Result<[u64; 2]> {
+pub fn day02(filename: &Path) -> Result<ReturnType> {
   let mut part1 = 0;
   let mut part2 = 0;
   for line in std::fs::read_to_string(filename)?.lines() {
@@ -63,10 +64,10 @@ pub fn day02(filename: &Path) -> Result<[u64; 2]> {
     part2 += result_part2(line_str[0], line_str[1])?;
   }
 
-  Ok([part1, part2])
+  Ok(ReturnType::Numeric(part1, part2))
 }
 
-pub fn day02_speed(filename: &Path) -> Result<[u64; 2]> {
+pub fn day02_speed(filename: &Path) -> Result<ReturnType> {
   let mut part1 = 0;
   let mut part2 = 0;
   for line in std::fs::read_to_string(filename)?.lines() {
@@ -76,7 +77,7 @@ pub fn day02_speed(filename: &Path) -> Result<[u64; 2]> {
     part2 += result_part2(value1, value2)?;
   }
 
-  Ok([part1, part2])
+  Ok(ReturnType::Numeric(part1, part2))
 }
 
 #[cfg(test)]
