@@ -14,6 +14,7 @@ mod day02;
 mod day03;
 mod day04;
 mod day05;
+mod day06;
 
 #[cfg(test)]
 mod test_helper;
@@ -105,7 +106,8 @@ fn main() {
     day04::day04,
     day04::day04_speed,
     day05::day05,
-    day05::day05_speed
+    day05::day05_speed,
+    day06::day06
   );
 
   let args = Args::parse();
