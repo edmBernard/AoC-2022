@@ -44,6 +44,7 @@ std::string ReadToString(const std::string &filename) {
 class IteratorOnLines {
 
 public:
+  // IteratorOnLines(const IteratorOnLines&) = delete;
   using iterator_category = std::input_iterator_tag;
   using difference_type = std::ptrdiff_t;
   using value_type = std::string_view;
@@ -78,7 +79,7 @@ public:
   bool operator!=(const IteratorOnLines &b) {
     // Ugly trick, we assume the check condition will always be vs the end iterator.
     // So we don't need to create a real end iterator we just check vs string_view end index
-    return this->next != std::string_view::npos;
+    return this->next != std::string_view::npos && this->start != std::string_view::npos;
   };
 
 private:
@@ -92,6 +93,12 @@ private:
 
 } // namespace
 
+enum class State {
+  ParseHeader,
+  InterpreteHeader,
+  ParseMovement,
+};
+
 // ./standalonecpp ../data/day03.txt
 // We read the whole file in a string
 // We use an iterator implementation that was a bit tricky/ugly
@@ -101,39 +108,79 @@ int main_speed_iter(int argc, char *argv[]) {
     return 1;
 
   auto start_temp = std::chrono::high_resolution_clock::now();
-  uint64_t part1 = 0;
-  uint64_t part2 = 0;
+  std::string part1;
+  std::string part2;
 
-  for (int i = 0; i < 10000; ++i) {
+  for (int benchRun = 0; benchRun < 10000; ++benchRun) {
 
     std::string input_raw = ReadToString(argv[1]);
 
-    part1 = 0;
-    part2 = 0;
+    part1 = "";
+    part2 = "";
 
     // Reading directly the whole file and parsing each line is faster than getline+parsing
-    for (auto line : IteratorOnLines(input_raw)) {
+    std::vector<std::string_view> header;
+    size_t binSize = 0;
+    State state = State::ParseHeader;
+    std::vector<std::vector<char>> boardPart1;
+    std::vector<std::vector<char>> boardPart2;
+    std::vector<char> tempPart1;
+    std::vector<char> tempPart2;
+    for (auto &line : IteratorOnLines(input_raw)) {
+      switch (state) {
+      case State::ParseHeader: {
+        if (line[1] == '1') {
+          binSize = line[line.size() - 1] - '0';
+          state = State::InterpreteHeader;
+        } else {
+          header.push_back(line);
+        }
+      } break;
+      case State::InterpreteHeader: {
+        boardPart1 = std::vector<std::vector<char>>(binSize);
+        for (int lineIndex = header.size() - 1; lineIndex >= 0; --lineIndex) {
+          for (int stackOffset = 1, stackIndex = 0; stackOffset < header[lineIndex].size(); stackOffset += 4, ++stackIndex) {
+            if (header[lineIndex][stackOffset] != ' ') {
+              boardPart1[stackIndex].push_back(header[lineIndex][stackOffset]);
+            }
+          }
+        }
+        boardPart2 = boardPart1;
+        state = State::ParseMovement;
+      } break;
+      case State::ParseMovement: {
+        // Movement line are of the form "move (\d+) from (\d+) to (\d+)"
+        auto splitter = IteratorOnLines(line, ' ');
+        ++splitter;
+        const uint64_t quantity = Parse<uint64_t>(*splitter);
+        ++++splitter;
+        const uint64_t src = Parse<uint64_t>(*splitter) - 1;
+        ++++splitter;
+        const uint64_t dst = Parse<uint64_t>(*splitter) - 1;
 
-      const size_t posToken1 = line.find("-");
-      const size_t posToken2 = line.find(",");
-      const size_t posToken3 = line.find("-", posToken2);
-      const uint64_t minElf1 = Parse<uint64_t>(std::string_view{line.data(), posToken1});
-      const uint64_t maxElf1 = Parse<uint64_t>(std::string_view{line.data() + posToken1 + 1, posToken2 - posToken1 - 1});
-      const uint64_t minElf2 = Parse<uint64_t>(std::string_view{line.data() + posToken2 + 1, posToken3 - posToken2 - 1});
-      const uint64_t maxElf2 = Parse<uint64_t>(std::string_view{line.data() + posToken3 + 1, line.size() - posToken3 - 1});
-      // part1
-      if (minElf1 <= minElf2 && maxElf1 >= maxElf2) {
-        part1 += 1;
-      } else if (minElf2 <= minElf1 && maxElf2 >= maxElf1) {
-        part1 += 1;
-      };
-      // part2
-      if (minElf1 <= minElf2 && maxElf1 >= minElf2) {
-        part2 += 1;
-      } else if (minElf2 <= minElf1 && maxElf2 >= minElf1) {
-        part2 += 1;
+        for (int i = 0; i < quantity; ++i) {
+          tempPart1.push_back(boardPart1[src].back());
+          boardPart1[src].pop_back();
+          tempPart2.push_back(boardPart2[src].back());
+          boardPart2[src].pop_back();
+        }
+        for (int i = tempPart2.size() - 1; i >= 0; --i) {
+          boardPart2[dst].push_back(tempPart2[i]);
+        }
+        for (int i = 0; i < tempPart1.size(); ++i) {
+          boardPart1[dst].push_back(tempPart1[i]);
+        }
+        tempPart1.clear();
+        tempPart2.clear();
+      } break;
       }
     }
+
+    for (auto &stack : boardPart1)
+      part1.push_back(stack.back());
+
+    for (auto &stack : boardPart2)
+      part2 += stack.back();
   }
 
   std::chrono::duration<double, std::milli> elapsed_temp = std::chrono::high_resolution_clock::now() - start_temp;

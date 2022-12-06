@@ -100,7 +100,7 @@ pub fn day05_speed(filename: &Path) -> Result<ReturnType> {
         .nth(0)
         .ok_or("Empty line")?
         .to_digit(10)
-        .ok_or("Fail to parse digit")?;
+        .ok_or("Fail to parse digit")? as usize;
       break;
     }
     header.push(line);
@@ -116,14 +116,16 @@ pub fn day05_speed(filename: &Path) -> Result<ReturnType> {
     }
   }
   let mut board_part2 = board_part1.clone();
+
   // Parse and apply movement
-  let regex = Regex::new(r"move (\d+) from (\d+) to (\d+)")?;
-  for line in content_iterator {
-    if line.is_empty() {
-      continue;
-    }
+  // Creating this vector as temporary object inside the loop cost in allocation so much
+  let mut temp_part1 = Vec::new();
+  let mut temp_part2 = Vec::new();
+  // the skip is for the empty line between header and movement
+  for line in content_iterator.skip(1) {
     // Movement line are of the form "move (\d+) from (\d+) to (\d+)"
-    let mut splitted = line.split(" ");
+    // on this implementation split take most of the time with a custom iterator using directly memchr I can win 10%
+    let mut splitted = line.split(' ');
     splitted.next();  // drop "move"
     let quantity = splitted.next().ok_or("Failed to get quantity")?.parse::<u64>()?;
     splitted.next();  // drop "from"
@@ -131,18 +133,18 @@ pub fn day05_speed(filename: &Path) -> Result<ReturnType> {
     splitted.next();  // drop "to"
     let dst = splitted.next().ok_or("Failed to get src position")?.parse::<u64>()? - 1;
 
-    let mut temp_part1 = Vec::new();
-    let mut temp_part2 = Vec::new();
     for _ in 0..quantity {
       temp_part1.push(board_part1[src as usize].pop().ok_or("No enough value to pop")?);
       temp_part2.push(board_part2[src as usize].pop().ok_or("No enough value to pop")?);
     }
-    for elem in temp_part1 {
-      board_part1[dst as usize].push(elem);
+    for elem in &temp_part1 {
+      board_part1[dst as usize].push(*elem);
     }
-    for elem in temp_part2.into_iter().rev() {
-      board_part2[dst as usize].push(elem);
+    for elem in temp_part2.iter().rev() {
+      board_part2[dst as usize].push(*elem);
     }
+    temp_part1.clear();
+    temp_part2.clear();
   }
 
   let part1 = board_part1
