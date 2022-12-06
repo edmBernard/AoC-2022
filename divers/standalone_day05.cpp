@@ -79,7 +79,7 @@ public:
   bool operator!=(const IteratorOnLines &b) {
     // Ugly trick, we assume the check condition will always be vs the end iterator.
     // So we don't need to create a real end iterator we just check vs string_view end index
-    return this->next != std::string_view::npos && this->start != std::string_view::npos;
+    return this->next != std::string_view::npos;
   };
 
 private:
@@ -180,7 +180,7 @@ int main_speed_iter(int argc, char *argv[]) {
       part1.push_back(stack.back());
 
     for (auto &stack : boardPart2)
-      part2 += stack.back();
+      part2.push_back(stack.back());
   }
 
   std::chrono::duration<double, std::milli> elapsed_temp = std::chrono::high_resolution_clock::now() - start_temp;
