@@ -26,9 +26,9 @@ pub fn day07(filename: &Path) -> Result<ReturnType> {
 
   // I can't make the HashMap<String, Option<Entry>> work on the second
   // iteration where we compute size because we borrow the key and modify value
-  let root = "/".to_string();
   let mut current_idx = 0;
-  tree_index.insert(root, current_idx);
+  let mut current_path = "/".to_string();
+  tree_index.insert(current_path.clone(), current_idx);
   tree_content.push(Entry{kind:Type::Directory, size:0, parent:None});
 
   file_content
@@ -41,16 +41,26 @@ pub fn day07(filename: &Path) -> Result<ReturnType> {
       let command = temp.next().unwrap();
       if command == "cd" {
         let folder_name = String::from(temp.next().unwrap());
-        if folder_name == ".." {
-          current_idx = tree_content[current_idx].parent.unwrap();
-        } else {
-          if !tree_index.contains_key(&folder_name) {
-            let inserted_index = tree_content.len();
-            tree_index.insert(folder_name, inserted_index);
-            tree_content.push(Entry{kind:Type::Directory, size:0, parent:Some(current_idx)});
-            current_idx = inserted_index;
-          } else {
-            current_idx = tree_index.get(&folder_name).unwrap().clone();
+        match folder_name.as_str() {
+          "/" => {
+            current_idx = 0;
+            current_path = String::from("/");
+          },
+          ".." => {
+            current_idx = tree_content[current_idx].parent.unwrap();
+            let temp = current_path.split("/").collect::<Vec<_>>();
+            current_path = temp[..temp.len()-1].join("/");
+          },
+          _ => {
+            let fullname = format!("{}/{}", current_path, folder_name);
+            if !tree_index.contains_key(&fullname) {
+              let inserted_index = tree_content.len();
+              tree_index.insert(folder_name, inserted_index);
+              tree_content.push(Entry{kind:Type::Directory, size:0, parent:Some(current_idx)});
+              current_idx = inserted_index;
+            } else {
+              current_idx = tree_index.get(&fullname).unwrap().clone();
+            }
           }
         }
         return;
@@ -108,7 +118,7 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    main:   day07,        "data/day07.txt",              [1282, 3513];
+    main:   day07,        "data/day07.txt",              [1543140, 3513];
     test1:  day07,        "data/day07_test1.txt",        [95437, 19];
   );
 }
