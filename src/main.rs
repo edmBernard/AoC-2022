@@ -15,7 +15,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
-// mod day07;
+mod day07;
 mod day08;
 
 #[cfg(test)]
@@ -71,9 +71,9 @@ macro_rules! register_command {
 /// * `name` - name of the command
 fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &str) -> Option<u128> {
   let now = Instant::now();
-  for _ in 0..10000 {
-    _ = command(filepath);
-  }
+  // for _ in 0..10000 {
+  //   _ = command(filepath);
+  // }
   match command(filepath) {
     Ok(result) => {
       let duration = now.elapsed().as_micros();
@@ -111,6 +111,7 @@ fn main() {
     day05::day05_speed,
     day06::day06,
     day06::day06_speed,
+    day07::day07,
     day08::day08,
     day08::day08_speed
   );

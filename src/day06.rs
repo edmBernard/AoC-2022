@@ -1,4 +1,4 @@
-#![allow(unused_variables)]
+// #![allow(unused_variables)]
 use itertools::Itertools;
 use std::path::Path;
 

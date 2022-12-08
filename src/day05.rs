@@ -1,4 +1,4 @@
-#![allow(unused_variables)]
+// #![allow(unused_variables)]
 use regex::Regex;
 use std::path::Path;
 
