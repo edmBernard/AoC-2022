@@ -4,94 +4,198 @@ use std::path::Path;
 use crate::utils::ReturnType;
 use crate::Result;
 
+#[derive(Debug, Clone)]
+struct Board {
+  data: Vec<u8>,
+  width: usize,
+}
+
+trait BoardTrait {
+  fn get(&self, x: usize, y: usize) -> u8;
+  fn get_mut(&mut self, x: usize, y: usize) -> &mut u8;
+  fn get_height(&mut self) -> usize;
+}
+
+impl BoardTrait for Board {
+  fn get(&self, x: usize, y: usize) -> u8 {
+    self.data[x + y * self.width]
+  }
+  fn get_mut(&mut self, x: usize, y: usize) -> &mut u8 {
+    let w = self.width;
+    &mut self.data[x + y * w]
+  }
+  fn get_height(&mut self) -> usize {
+    self.data.len() / self.width
+  }
+}
+
+impl std::fmt::Display for Board {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    for h in 0..(self.data.len() / self.width) {
+      if h != 0 {
+        write!(f, "\n")?
+      }
+      for w in 0..self.width {
+        write!(f, "{} ", self.get(w, h))?
+      }
+    }
+    Ok(())
+  }
+}
+
+// I use vectorized board, that reduce the boundary check on vector access compare to vector of vector
 pub fn day08(filename: &Path) -> Result<ReturnType> {
-  let mut board_part1: Vec<Vec<u8>> = Vec::new();
-  let mut board_part2: Vec<Vec<u8>> = Vec::new();
+  let mut board = Board {
+    data: Vec::new(),
+    width: 0,
+  };
   for line in std::fs::read_to_string(filename)?.lines() {
-    board_part1.push(Vec::new());
+    if board.width == 0 {
+      board.width = line.chars().count();
+    }
     for tree in line.chars() {
-      board_part1
-        .last_mut()
-        .ok_or("board is empty")?
+      board
+        .data
         .push(tree.to_digit(10).ok_or("Fail to parse tree height")? as u8);
     }
   }
-  let height = board_part1.len();
-  let width = board_part1[0].len();
-  // let mut board_max_top_bottom: Vec<Vec<u8>> = vec![vec![0; width]; height];
-  let mut board_max_top_bottom = board_part1.clone();
-  let mut board_max_left_right = board_part1.clone();
-  for row in 1..height - 1 {
-    for col in 1..width - 1 {
-      board_max_top_bottom[row][col] = board_part1[row -1 ][col].max(board_max_top_bottom[row - 1][col]);
-      board_max_left_right[row][col] = board_part1[row][col - 1].max(board_max_left_right[row][col - 1]);
-    }
-  }
-  let mut board_max_bottom_top = board_part1.clone();
-  let mut board_max_right_left = board_part1.clone();
-  for row in (1..height - 1).rev() {
-    for col in (1..width - 1).rev() {
-      board_max_bottom_top[row][col] = board_part1[row + 1][col].max(board_max_bottom_top[row + 1][col]);
-      board_max_right_left[row][col] = board_part1[row][col + 1].max(board_max_right_left[row][col + 1]);
-    }
-  }
 
-  let mut part1 = (height * 2 + width * 2 - 4) as u64;
-  for row in 1..height - 1 {
-    for col in 1..width - 1 {
-      let tree = board_part1[row][col];
-      part1 += if tree > board_max_top_bottom[row][col]
-        || tree > board_max_left_right[row][col]
-        || tree > board_max_bottom_top[row][col]
-        || tree > board_max_right_left[row][col]
-      {
-        1
-      } else {
-        0
-      }
-    }
-  }
+  let mut part1 = (board.get_height() * 2 + board.width * 2 - 4) as u64;
   let mut part2 = 0;
-  for row in 0..height {
-    for col in 0..width {
+  for y in 1..board.get_height() - 1 {
+    for x in 1..board.width - 1 {
+      let current = board.get(x, y);
+      // toward Top
+      let mut top = 0;
+      let mut reach_top_border = true;
+      for sight_y in (0..y).rev() {
+        top += 1;
+        if current > board.get(x, sight_y) {
+        } else {
+          reach_top_border = false;
+          break;
+        };
+      }
 
-      let tree = board_part1[row][col];
-      let top = 'block: {
-        for (index, r) in (0..row).rev().enumerate() {
-          if board_part1[r][col] >= tree {
-            break 'block index+1;
-          }
+      // toward Bottom
+      let mut bottom = 0;
+      let mut reach_bottom_border = true;
+      for sight_y in y+1..board.get_height() {
+        bottom += 1;
+        if current > board.get(x, sight_y) {
+        } else {
+          reach_bottom_border = false;
+          break;
         };
-        (0..row).len()
-      };
-      let left = 'block: {
-        for (index, c) in (0..col).rev().enumerate() {
-          if board_part1[row][c] >= tree {
-            break 'block index+1;
-          }
+      }
+
+      // toward Left
+      let mut left = 0;
+      let mut reach_left_border = true;
+      for sight_x in (0..x).rev() {
+        left += 1;
+        if current > board.get(sight_x, y) {
+        } else {
+          reach_left_border = false;
+          break;
         };
-        (0..col).len()
-      };
-      let bottom = 'block: {
-        for (index, r) in (row+1..height).enumerate() {
-          if board_part1[r][col] >= tree {
-            break 'block index+1;
-          }
+      }
+
+      // toward Right
+      let mut right = 0;
+      let mut reach_right_border = true;
+      for sight_x in x+1..board.width {
+        right += 1;
+        if current > board.get(sight_x, y) {
+        } else {
+          reach_right_border = false;
+          break;
         };
-        (row+1..height).len()
-      };
-      let right = 'block: {
-        for (index, c) in (col+1..width).enumerate() {
-          if board_part1[row][c] >= tree {
-            break 'block index+1;
-          }
-        };
-        (col+1..width).len()
-      };
-      part2 = part2.max(top * left * bottom * right);
+      }
+
+      part1 += (reach_top_border || reach_bottom_border || reach_left_border || reach_right_border) as u64;
+      part2 = part2.max(top * bottom * left * right);
     }
+  }
+  Ok(ReturnType::Numeric(part1, part2))
+}
+
+
+// I use vectorized board, that reduce the boundary check on vector access compare to vector of vector
+pub fn day08_speed(filename: &Path) -> Result<ReturnType> {
+  let mut board = Board {
+    data: Vec::new(),
+    width: 0,
   };
-  Ok(ReturnType::Numeric(part1, part2 as u64))
+  for line in std::fs::read_to_string(filename)?.lines() {
+    if board.width == 0 {
+      board.width = line.chars().count();
+    }
+    for tree in line.chars() {
+      board
+        .data
+        .push(tree.to_digit(10).ok_or("Fail to parse tree height")? as u8);
+    }
+  }
+
+  let mut part1 = (board.get_height() * 2 + board.width * 2 - 4) as u64;
+  let mut part2 = 0;
+  for y in 1..board.get_height() - 1 {
+    for x in 1..board.width - 1 {
+      let current = board.get(x, y);
+      // toward Top
+      let mut top = 0;
+      let mut reach_top_border = true;
+      for sight_y in (0..y).rev() {
+        top += 1;
+        if current > board.get(x, sight_y) {
+        } else {
+          reach_top_border = false;
+          break;
+        };
+      }
+
+      // toward Bottom
+      let mut bottom = 0;
+      let mut reach_bottom_border = true;
+      for sight_y in y+1..board.get_height() {
+        bottom += 1;
+        if current > board.get(x, sight_y) {
+        } else {
+          reach_bottom_border = false;
+          break;
+        };
+      }
+
+      // toward Left
+      let mut left = 0;
+      let mut reach_left_border = true;
+      for sight_x in (0..x).rev() {
+        left += 1;
+        if current > board.get(sight_x, y) {
+        } else {
+          reach_left_border = false;
+          break;
+        };
+      }
+
+      // toward Right
+      let mut right = 0;
+      let mut reach_right_border = true;
+      for sight_x in x+1..board.width {
+        right += 1;
+        if current > board.get(sight_x, y) {
+        } else {
+          reach_right_border = false;
+          break;
+        };
+      }
+
+      part1 += (reach_top_border || reach_bottom_border || reach_left_border || reach_right_border) as u64;
+      part2 = part2.max(top * bottom * left * right);
+    }
+  }
+  Ok(ReturnType::Numeric(part1, part2))
 }
 
 #[cfg(test)]
@@ -103,5 +207,7 @@ mod tests {
   add_test!(
     main:   day08,        "data/day08.txt",              [1688, 410400];
     test1:  day08,        "data/day08_test1.txt",        [21, 8];
+    main:   day08_speed,  "data/day08.txt",              [1688, 410400];
+    test1:  day08_speed,  "data/day08_test1.txt",        [21, 8];
   );
 }

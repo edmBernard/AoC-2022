@@ -109,7 +109,8 @@ fn main() {
     day04::day04_speed,
     day05::day05,
     day05::day05_speed,
-    day08::day08
+    day08::day08,
+    day08::day08_speed
   );
 
   let args = Args::parse();

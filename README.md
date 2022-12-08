@@ -35,7 +35,8 @@ The executable is named `AoC-2022`. Inputs path can be specified as argument or 
 | Day02 | Rock Paper Scissors       | -     |
 | Day03 | Duplicate in compartments | -     |
 | Day04 | Check range overlapping   | -     |
-| Day05 |                           | -     |
+| Day05 | Stack swap                | -     |
+| Day08 | Line of sight             | -     |
 
 ## Some Timing for `10'000` run :
 
@@ -45,6 +46,7 @@ day01::day01_speed             in  676.64 ms : part1=70720      part2=207148
 day02::day02_speed             in  828.58 ms : part1=11475      part2=16862
 day03::day03_speed             in  759.69 ms : part1=8202       part2=2864
 day04::day04_speed             in  622.73 ms : part1=490        part2=921
+day05::day05_speed             in  866.24 ms : part1=ZWHVFWQWW  part2=HZFZCCWWV
 
 In C++
 day01                          in 665.876 ms : part1=70720      part2=207148
