@@ -1,5 +1,4 @@
 // #![allow(unused_variables)]
-use std::hash::{Hash, Hasher};
 use std::collections::HashMap;
 use std::path::Path;
 
@@ -98,17 +97,17 @@ pub fn day07(filename: &Path) -> Result<ReturnType> {
     }
     // Compute part1
     let part1 = tree_content.iter().filter_map(|entry| if entry.kind == Type::Directory && entry.size <= 100000 {
-      println!("{}", entry.size);
       Some(entry.size) } else { None }
     ).sum::<usize>();
-    for (k, v) in &tree_index {
-      println!("k:-{:?}- v:-{:?}-", k, tree_content[*v]);
-    }
 
-    // for (k, v) in tree_index {
-    //   println!("k:-{:?}- v:-{:?}-", k, v);
-    // }
-  Ok(ReturnType::Numeric(part1 as u64, 2 as u64))
+    let total_used_space = tree_content[0].size;
+    let space_to_free = 30_000_000 - (70_000_000 - total_used_space);
+    let mut part2_list = tree_content.iter().filter_map(|entry| if entry.kind == Type::Directory && entry.size >= space_to_free {
+      Some(entry.size) } else { None }
+    ).collect::<Vec<_>>();
+    part2_list.sort();
+    let part2 = part2_list[0];
+  Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
 
 #[cfg(test)]
@@ -118,7 +117,7 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    main:   day07,        "data/day07.txt",              [1543140, 3513];
-    test1:  day07,        "data/day07_test1.txt",        [95437, 19];
+    main:   day07,        "data/day07.txt",              [1543140, 1117448];
+    test1:  day07,        "data/day07_test1.txt",        [95437, 24933642];
   );
 }
