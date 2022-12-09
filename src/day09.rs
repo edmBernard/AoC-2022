@@ -87,16 +87,8 @@ pub fn day09(filename: &Path) -> Result<ReturnType> {
         // let mut tail = &mut rope2[0];
 
         if tail.distance(&head) > 1 {
-          tail.x += match head.x.cmp(&tail.x) {
-            std::cmp::Ordering::Equal => 0,
-            std::cmp::Ordering::Less => -1,
-            std::cmp::Ordering::Greater => 1
-          };
-          tail.y += match head.y.cmp(&tail.y) {
-            std::cmp::Ordering::Equal => 0,
-            std::cmp::Ordering::Less => -1,
-            std::cmp::Ordering::Greater => 1
-          };
+          tail.x += (head.x - tail.x).signum();
+          tail.y += (head.y - tail.y).signum();
         }
       }
       tail_visited_position_part1.insert((rope[1].x, rope[1].y));
@@ -149,16 +141,8 @@ pub fn day09_speed(filename: &Path) -> Result<ReturnType> {
         // let mut tail = &mut rope2[0];
 
         if tail.distance(&head) > 1 {
-          tail.x += match head.x.cmp(&tail.x) {
-            std::cmp::Ordering::Equal => 0,
-            std::cmp::Ordering::Less => -1,
-            std::cmp::Ordering::Greater => 1
-          };
-          tail.y += match head.y.cmp(&tail.y) {
-            std::cmp::Ordering::Equal => 0,
-            std::cmp::Ordering::Less => -1,
-            std::cmp::Ordering::Greater => 1
-          };
+          tail.x += (head.x - tail.x).signum();
+          tail.y += (head.y - tail.y).signum();
         }
       }
       let temp1 = &mut tail_visited_position_part1[((MAX_DIM as i32 / 2 + rope[1].x) * MAX_DIM as i32 + (MAX_DIM as i32 / 2 + rope[1].y)) as usize];
