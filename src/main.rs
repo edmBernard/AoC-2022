@@ -9,16 +9,7 @@ use std::time::Instant;
 mod utils;
 use utils::ReturnType;
 
-mod day01;
-mod day02;
-mod day03;
-mod day04;
-mod day05;
-mod day06;
-mod day07;
-mod day08;
-mod day09;
-mod day10;
+mod days;
 
 #[cfg(test)]
 mod test_helper;
@@ -101,24 +92,39 @@ fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &
 
 fn main() {
   let register = register_command!(
-    day01::day01,
-    day01::day01_speed,
-    day02::day02,
-    day02::day02_speed,
-    day03::day03,
-    day03::day03_speed,
-    day04::day04,
-    day04::day04_speed,
-    day05::day05,
-    day05::day05_speed,
-    day06::day06,
-    day06::day06_speed,
-    day07::day07,
-    day08::day08,
-    day08::day08_speed,
-    day09::day09,
-    day09::day09_speed,
-    day10::day10
+    days::day01::day01,
+    days::day01::day01_speed,
+    days::day02::day02,
+    days::day02::day02_speed,
+    days::day03::day03,
+    days::day03::day03_speed,
+    days::day04::day04,
+    days::day04::day04_speed,
+    days::day05::day05,
+    days::day05::day05_speed,
+    days::day06::day06,
+    days::day06::day06_speed,
+    days::day07::day07,
+    days::day08::day08,
+    days::day08::day08_speed,
+    days::day09::day09,
+    days::day09::day09_speed,
+    days::day10::day10
+    // days::day10::day11,
+    // days::day10::day12,
+    // days::day10::day13,
+    // days::day10::day14,
+    // days::day10::day15,
+    // days::day10::day16,
+    // days::day10::day17,
+    // days::day10::day18,
+    // days::day10::day19,
+    // days::day10::day20,
+    // days::day10::day21,
+    // days::day10::day22,
+    // days::day10::day23,
+    // days::day10::day24,
+    // days::day10::day25
   );
 
   let args = Args::parse();
