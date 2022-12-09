@@ -52,6 +52,7 @@ day05::day05_speed             in  866.24 ms : part1=ZWHVFWQWW  part2=HZFZCCWWV
 day06::day06_speed             in  521.10 ms : part1=1282       part2=3513
 day07::day07                   in 1807.73 ms : part1=1543140    part2=1117448
 day08::day08_speed             in 2443.45 ms : part1=1688       part2=410400
+day09::day09_speed             in 10023.91 ms : part1=6503       part2=2724
 
 In C++
 day01                          in 665.876 ms : part1=70720      part2=207148
