@@ -16,7 +16,7 @@ pub fn day06(filename: &Path) -> Result<ReturnType> {
     .enumerate()
     .filter_map(|(index, chars)| {
       let mut char_list = chars.to_owned();
-      char_list.sort();
+      char_list.sort_unstable();
       for (v1, v2) in char_list.iter().tuple_windows::<(_, _)>() {
         if v1 == v2 {
           return None;
@@ -34,7 +34,7 @@ pub fn day06(filename: &Path) -> Result<ReturnType> {
     .enumerate()
     .filter_map(|(index, chars)| {
       let mut char_list = chars.to_owned();  // to_own is faster than .iter.collect
-      char_list.sort();
+      char_list.sort_unstable();
       // tuple_windows is faster than using dedup and checking the length
       for (v1, v2) in char_list.iter().tuple_windows::<(_, _)>() {
         if v1 == v2 {
