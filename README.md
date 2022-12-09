@@ -31,15 +31,17 @@ The executable is named `AoC-2022`. Inputs path can be specified as argument or 
 
 | Day   | Description                | Tips  |
 |--     |--                          |--     |
-| Day01 | Max of range               | -     |
-| Day02 | Rock Paper Scissors        | -     |
-| Day03 | Duplicate in compartments  | -     |
-| Day04 | Check range overlapping    | -     |
-| Day05 | Stack swap                 | -     |
-| Day06 | Check block if duplicate   | -     |
-| Day07 | Directory mapping          | -     |
-| Day08 | Line of sight              | -     |
-| Day09 | Move rope                  | Using a big vec instead of HashSet |
+| Day01 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/1) [<sup>solution</sup>](src/days/day01.rs) | Max of range               | -     |
+| Day02 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/2) [<sup>solution</sup>](src/days/day02.rs) | Rock Paper Scissors        | -     |
+| Day03 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/3) [<sup>solution</sup>](src/days/day03.rs) | Duplicate in compartments  | -     |
+| Day04 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/4) [<sup>solution</sup>](src/days/day04.rs) | Check range overlapping    | -     |
+| Day05 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/5) [<sup>solution</sup>](src/days/day05.rs) | Stack swap                 | -     |
+| Day06 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/6) [<sup>solution</sup>](src/days/day06.rs) | Check block if duplicate   | -     |
+| Day07 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/7) [<sup>solution</sup>](src/days/day07.rs) | Directory mapping          | -     |
+| Day08 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/8) [<sup>solution</sup>](src/days/day08.rs) | Line of sight              | -     |
+| Day09 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/9) [<sup>solution</sup>](src/days/day09.rs) | Move rope                  | Using a big vec instead of HashSet |
+
+
 
 ## Some Timing for `10'000` run :
 
