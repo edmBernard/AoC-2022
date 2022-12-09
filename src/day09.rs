@@ -18,6 +18,23 @@ impl Point {
   }
 }
 
+/// like split_at_mut but we give 2 elems instead of 2 slice
+fn take2_at_mut(values: &mut [Point], index1: usize, index2: usize) -> (&mut Point, &mut Point) {
+    let len = values.len();
+    let ptr = values.as_mut_ptr();
+
+    debug_assert!(index1 <= len);
+    debug_assert!(index2 <= len);
+    debug_assert!(index1 != index2);
+
+    unsafe {
+        (
+          &mut *ptr.add(index1),
+          &mut *ptr.add(index2),
+        )
+    }
+}
+
 impl Hash for Point {
     fn hash<H: Hasher>(&self, state: &mut H) {
       let x_byte: [u8; 4] = self.x.to_ne_bytes();
@@ -63,9 +80,12 @@ pub fn day09(filename: &Path) -> Result<ReturnType> {
       }
 
       for index in 1..rope.len() {
-        let (rope1, rope2) = rope.split_at_mut(index);
-        let head = &rope1[index-1];
-        let mut tail = &mut rope2[0];
+        let (head, tail) = take2_at_mut(&mut rope[..], index-1, index);
+        // take2_at_mut can be replace by split_at_mut, there is almost no speed diff
+        // let (rope1, rope2) = rope.split_at_mut(index);
+        // let head = &rope1[index-1];
+        // let mut tail = &mut rope2[0];
+
         if tail.distance(&head) > 1 {
           tail.x += match head.x.cmp(&tail.x) {
             std::cmp::Ordering::Equal => 0,
@@ -91,10 +111,14 @@ pub fn day09(filename: &Path) -> Result<ReturnType> {
 
 pub fn day09_speed(filename: &Path) -> Result<ReturnType> {
 
-  let mut tail_visited_position_part1: HashSet<Point> = HashSet::new();
-  let mut tail_visited_position_part2: HashSet<Point> = HashSet::new();
+  // use big vec instead of hashset it divise by 2 the time but is more uncertain
+  // with my puzzle input 500 is enough
+  const MAX_DIM : usize = 500;
+  let mut tail_visited_position_part1 = [false; MAX_DIM*MAX_DIM];
+  let mut tail_visited_position_part2 = [false; MAX_DIM*MAX_DIM];
   let mut rope = vec![Point{x:0, y:0}; 10];
-
+  let mut part1 = 0;
+  let mut part2 = 0;
   for line in std::fs::read_to_string(filename)?.lines() {
     let mut line_splitted = line.split(" ");
     let direction = line_splitted.next().unwrap();
@@ -118,9 +142,12 @@ pub fn day09_speed(filename: &Path) -> Result<ReturnType> {
       }
 
       for index in 1..rope.len() {
-        let (rope1, rope2) = rope.split_at_mut(index);
-        let head = &rope1[index-1];
-        let mut tail = &mut rope2[0];
+        let (head, tail) = take2_at_mut(&mut rope[..], index-1, index);
+        // take2_at_mut can be replace by split_at_mut, there is almost no speed diff
+        // let (rope1, rope2) = rope.split_at_mut(index);
+        // let head = &rope1[index-1];
+        // let mut tail = &mut rope2[0];
+
         if tail.distance(&head) > 1 {
           tail.x += match head.x.cmp(&tail.x) {
             std::cmp::Ordering::Equal => 0,
@@ -134,12 +161,18 @@ pub fn day09_speed(filename: &Path) -> Result<ReturnType> {
           };
         }
       }
-      tail_visited_position_part1.insert(rope[1].clone());
-      tail_visited_position_part2.insert(rope[9].clone());
+      let temp1 = &mut tail_visited_position_part1[((MAX_DIM as i32 / 2 + rope[1].x) * MAX_DIM as i32 + (MAX_DIM as i32 / 2 + rope[1].y)) as usize];
+      if !*temp1{
+        part1 += 1;
+        *temp1 = true;
+      };
+      let temp2 = &mut tail_visited_position_part2[((MAX_DIM as i32 / 2 + rope[9].x) * MAX_DIM as i32 + (MAX_DIM as i32 / 2 + rope[9].y)) as usize];
+      if !*temp2 {
+        part2 += 1;
+        *temp2 = true;
+      };
     }
   }
-  let part1 = tail_visited_position_part1.len();
-  let part2 = tail_visited_position_part2.len();
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
 
