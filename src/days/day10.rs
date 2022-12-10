@@ -1,5 +1,4 @@
 // #![allow(unused_variables)]
-use std::collections::HashMap;
 use std::path::Path;
 
 use itertools::Itertools;
@@ -7,43 +6,33 @@ use itertools::Itertools;
 use crate::utils::ReturnType;
 use crate::Result;
 
-#[derive(Debug, PartialEq, Eq, Clone)]
-enum Type {
-  Directory,
-  File,
-}
-
-#[derive(Debug, PartialEq, Eq, Clone)]
-struct Entry {
-  kind: Type,
-  size: usize,
-  parent: Option<usize>,
-}
-
 pub fn day10(filename: &Path) -> Result<ReturnType> {
   let mut register_value: Vec<i32> = Vec::new();
-  register_value.reserve(220);
+  const CRT_WIDTH: usize = 40;
+  const CRT_HEIGHT: usize = 6;
+  register_value.reserve(CRT_WIDTH * CRT_HEIGHT);
   let mut current_value = 1;
   register_value.push(current_value);  // to compensate zero indexing of array
-  register_value.push(current_value);
+  register_value.push(current_value);  // offset to compensate the fact the register is set at the end of cycle
+
   for line in std::fs::read_to_string(filename)?.lines() {
     let mut full_command = line.split(" ");
-    // Check command
     let command = full_command.next().ok_or("Empty Line Found")?;
     match command {
       "noop" => register_value.push(current_value),
       "addx" => {
         register_value.push(current_value);
         current_value += full_command
-          .next()
-          .ok_or("No Increment found in addx command")?
-          .parse::<i32>()?;
+        .next()
+        .ok_or("No Increment found in addx command")?
+        .parse::<i32>()?;
         register_value.push(current_value);
       }
       _ => Err("Unknown command")?,
     }
   }
-  let mut screen: Vec<char> = vec!['.'; 40*6];
+
+  let mut screen: Vec<char> = vec!['.'; CRT_WIDTH * CRT_HEIGHT];
   let mut part1 = 0;
   for cycle in 1..screen.len() {
     if (20..=220).step_by(40).contains(&cycle) {
@@ -53,9 +42,9 @@ pub fn day10(filename: &Path) -> Result<ReturnType> {
       screen[cycle-1] = '#';
     }
   }
-  // for row in 0..6 {
-  //   for col in 0..40 {
-  //     print!("{}", screen[col + row * 40]);
+  // for row in 0..CRT_HEIGHT {
+  //   for col in 0..CRT_WIDTH {
+  //     print!("{}", screen[col + row * CRT_WIDTH]);
   //   }
   //   println!("");
   // }
