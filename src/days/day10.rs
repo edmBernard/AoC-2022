@@ -2,6 +2,8 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+use itertools::Itertools;
+
 use crate::utils::ReturnType;
 use crate::Result;
 
@@ -22,6 +24,7 @@ pub fn day10(filename: &Path) -> Result<ReturnType> {
   let mut register_value: Vec<i32> = Vec::new();
   register_value.reserve(220);
   let mut current_value = 1;
+  register_value.push(current_value);  // to compensate zero indexing of array
   register_value.push(current_value);
   for line in std::fs::read_to_string(filename)?.lines() {
     let mut full_command = line.split(" ");
@@ -40,15 +43,29 @@ pub fn day10(filename: &Path) -> Result<ReturnType> {
       _ => Err("Unknown command")?,
     }
   }
-  for (idx, value) in register_value.iter().enumerate() {
-    println!("{} -> {}", idx, value);
-  }
+  let mut screen: Vec<char> = vec!['.'; 40*6];
   let mut part1 = 0;
-  for idx in (20..=220).step_by(40) {
-    part1 += register_value[idx-1] * idx as i32;
-    println!("{} -> {}", idx, register_value[idx-1]);
-
+  for cycle in 1..screen.len() {
+    if (20..=220).step_by(40).contains(&cycle) {
+      part1 += register_value[cycle] * cycle as i32;
+    }
+    if ((cycle-1).rem_euclid(40) as i32 - register_value[cycle]).abs() <= 1 {
+      screen[cycle-1] = '#';
+    }
   }
+  // for row in 0..6 {
+  //   for col in 0..40 {
+  //     print!("{}", screen[col + row * 40]);
+  //   }
+  //   println!("");
+  // }
+  // Visual solution
+  // ####.###...##..###..####.###...##....##.
+  // #....#..#.#..#.#..#.#....#..#.#..#....#.
+  // ###..#..#.#....#..#.###..#..#.#.......#.
+  // #....###..#....###..#....###..#.......#.
+  // #....#.#..#..#.#.#..#....#....#..#.#..#.
+  // ####.#..#..##..#..#.####.#.....##...##..
   Ok(ReturnType::Numeric(part1 as u64, 2 as u64))
 }
 
@@ -59,7 +76,7 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    main:   day10,        "data/day10.txt",              [11720, 1117448];
-    test1:  day10,        "data/day10_test1.txt",        [13140, 24933642];
+    main:   day10,        "data/day10.txt",              [11720, 2];
+    test1:  day10,        "data/day10_test1.txt",        [13140, 2];
   );
 }
