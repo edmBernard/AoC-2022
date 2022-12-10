@@ -109,22 +109,22 @@ fn main() {
     days::day08::day08_speed,
     days::day09::day09,
     days::day09::day09_speed,
-    days::day10::day10
-    // days::day10::day11,
-    // days::day10::day12,
-    // days::day10::day13,
-    // days::day10::day14,
-    // days::day10::day15,
-    // days::day10::day16,
-    // days::day10::day17,
-    // days::day10::day18,
-    // days::day10::day19,
-    // days::day10::day20,
-    // days::day10::day21,
-    // days::day10::day22,
-    // days::day10::day23,
-    // days::day10::day24,
-    // days::day10::day25
+    days::day10::day10,
+    days::day11::day11
+    // days::day12::day12,
+    // days::day13::day13,
+    // days::day14::day14,
+    // days::day15::day15,
+    // days::day16::day16,
+    // days::day17::day17,
+    // days::day18::day18,
+    // days::day19::day19,
+    // days::day20::day20,
+    // days::day21::day21,
+    // days::day22::day22,
+    // days::day23::day23,
+    // days::day24::day24,
+    // days::day25::day25
   );
 
   let args = Args::parse();
