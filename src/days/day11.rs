@@ -127,7 +127,7 @@ pub fn day11(filename: &Path) -> Result<ReturnType> {
         monkey_inspection[idx] += 1;
         let worry_level = (monkeys[idx].operation)(item);
         let after_bored = worry_level / 3;
-        if (after_bored) % monkeys[idx].div_test == 0 {
+        if after_bored % monkeys[idx].div_test == 0 {
           let monkey_index = monkeys[idx].monkey_if_true;
           items_part1[monkey_index].push(after_bored);
         } else {
@@ -157,7 +157,7 @@ pub fn day11(filename: &Path) -> Result<ReturnType> {
         monkey_inspection[idx] += 1;
         let worry_level = (monkeys[idx].operation)(*item);
         let after_bored = worry_level % ppcm;
-        if (after_bored) % monkeys[idx].div_test == 0 {
+        if after_bored % monkeys[idx].div_test == 0 {
           if_true.push(after_bored);
         } else {
           if_false.push(after_bored);
@@ -273,7 +273,7 @@ pub fn day11_speed(filename: &Path) -> Result<ReturnType> {
           Operation::Square => item * item,
         };
         let after_bored = worry_level / 3;
-        if (after_bored) % monkeys[idx].div_test == 0 {
+        if after_bored % monkeys[idx].div_test == 0 {
           let monkey_index = monkeys[idx].monkey_if_true;
           items_part1[monkey_index].push(after_bored);
         } else {
@@ -307,7 +307,7 @@ pub fn day11_speed(filename: &Path) -> Result<ReturnType> {
           Operation::Square => *item * *item,
         };
         let after_bored = worry_level % ppcm;
-        if (after_bored) % monkeys[idx].div_test == 0 {
+        if after_bored % monkeys[idx].div_test == 0 {
           if_true.push(after_bored);
         } else {
           if_false.push(after_bored);
