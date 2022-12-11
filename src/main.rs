@@ -65,7 +65,7 @@ macro_rules! register_command {
 fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &str) -> Option<u128> {
   let now = Instant::now();
   const NRUN: u32 = 10000;
-  for _ in 0..NRUN {
+  for _ in 0..NRUN-1 {
     _ = command(filepath);
   }
   match command(filepath) {
@@ -111,8 +111,8 @@ fn main() {
     days::day09::day09,
     days::day09::day09_speed,
     days::day10::day10,
-    days::day11::day11
-    // days::day12::day12,
+    days::day11::day11,
+    days::day12::day12
     // days::day13::day13,
     // days::day14::day14,
     // days::day15::day15,

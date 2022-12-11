@@ -1,7 +1,5 @@
-use itertools::Itertools;
 // #![allow(unused_variables)]
 use regex::Regex;
-use std::ops;
 use std::path::Path;
 
 use crate::utils::ReturnType;
@@ -25,8 +23,6 @@ struct Monkey {
 
 pub fn day11(filename: &Path) -> Result<ReturnType> {
   let mut monkeys: Vec<Monkey> = Vec::new();
-  let mut items_part1 = Vec::new();
-  let mut items_part2 = Vec::new();
   let mut ppcm = 1;
   let content = std::fs::read_to_string(filename)?;
   let lines = &mut content.lines();
@@ -42,6 +38,7 @@ pub fn day11(filename: &Path) -> Result<ReturnType> {
   //     If false: throw to monkey 3
   let line_test = Regex::new(r"(\d+)")?;
 
+  let mut items_part1 = Vec::new();
   while let Some(line) = lines.next() {
     if !line_header.is_match(line) {
       continue;
@@ -57,10 +54,10 @@ pub fn day11(filename: &Path) -> Result<ReturnType> {
       .split(", ")
       .map(|elem| elem.parse::<u64>())
       .flatten()
-      .collect_vec()
+      .collect::<Vec<_>>()
       .into_iter()
       .rev()
-      .collect_vec();
+      .collect::<Vec<_>>();
     items_part1.push(items);
 
     // Parse operation
@@ -101,7 +98,7 @@ pub fn day11(filename: &Path) -> Result<ReturnType> {
       monkey_if_false,
     })
   }
-  items_part2 = items_part1.clone();
+  let mut items_part2 = items_part1.clone();
 
   let mut monkey_inspection = vec![0; monkeys.len()];
   for _round in 0..20 {
