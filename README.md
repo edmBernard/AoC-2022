@@ -41,23 +41,25 @@ The executable is named `AoC-2022`. Inputs path can be specified as argument or 
 | Day08 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/8 ) [<sup>solution</sup>](src/days/day08.rs) | Line of sight                | -     |
 | Day09 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/9 ) [<sup>solution</sup>](src/days/day09.rs) | Move rope                    | Using a big vec instead of HashSet |
 | Day10 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/10) [<sup>solution</sup>](src/days/day10.rs) | cycle synchronisation in CRT | part2 is a visual solution  |
+| Day11 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/10) [<sup>solution</sup>](src/days/day10.rs) | Monkey pass | part2 overflow so we use Least common multiple-like to reduce worry level at each pass |
 
 
 
-## Some Timing for `10'000` run :
+## Some Timing on `10'000` run :
 
 ```
 In Rust
-day01::day01_speed             in  676.64 ms : part1=70720      part2=207148
-day02::day02_speed             in  828.58 ms : part1=11475      part2=16862
-day03::day03_speed             in  759.69 ms : part1=8202       part2=2864
-day04::day04_speed             in  622.73 ms : part1=490        part2=921
-day05::day05_speed             in  866.24 ms : part1=ZWHVFWQWW  part2=HZFZCCWWV
-day06::day06_speed             in  521.10 ms : part1=1282       part2=3513
-day07::day07                   in 1807.73 ms : part1=1543140    part2=1117448
-day08::day08_speed             in 2443.45 ms : part1=1688       part2=410400
-day09::day09_speed             in 3783.43 ms : part1=6503       part2=2724
-day10::day10                   in  439.23 ms : part1=11720      part2=2
+days::day01::day01_speed       in   67.84 us : part1=70720      part2=207148
+days::day02::day02_speed       in   81.44 us : part1=11475      part2=16862
+days::day03::day03_speed       in   73.59 us : part1=8202       part2=2864
+days::day04::day04_speed       in   62.08 us : part1=490        part2=921
+days::day05::day05_speed       in   86.36 us : part1=ZWHVFWQWW  part2=HZFZCCWWV
+days::day06::day06_speed       in   52.09 us : part1=1282       part2=3513
+days::day07::day07             in  276.58 us : part1=1543140    part2=1117448
+days::day08::day08_speed       in  257.59 us : part1=1688       part2=410400
+days::day09::day09_speed       in  383.57 us : part1=6503       part2=2724
+days::day10::day10             in   43.77 us : part1=11720      part2=2
+days::day11::day11             in 6048.64 us : part1=117624     part2=16792940265
 
 In C++
 day01                          in 665.876 ms : part1=70720      part2=207148

@@ -64,9 +64,10 @@ macro_rules! register_command {
 /// * `name` - name of the command
 fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &str) -> Option<u128> {
   let now = Instant::now();
-  // for _ in 0..10000 {
-  //   _ = command(filepath);
-  // }
+  const NRUN: u32 = 10000;
+  for _ in 0..NRUN {
+    _ = command(filepath);
+  }
   match command(filepath) {
     Ok(result) => {
       let duration = now.elapsed().as_micros();
@@ -75,9 +76,9 @@ fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &
         ReturnType::String(part1, part2) => (format!("{}", part1), format!("{}", part2)),
       };
       println!(
-        "{: <30} in {:>7.2} ms : part1={:<10} part2={:<10}",
+        "{: <30} in {:>7.2} us : part1={:<10} part2={:<10}",
         name,
-        duration as f32 / 1000.,
+        duration as f32 / NRUN as f32,
         part1,
         part2
       );
@@ -141,7 +142,6 @@ fn main() {
   // Apply commands to given file
   if input_path.is_file() {
     for (name, command) in register.iter() {
-
       if let Some(filter) = args.filter_inclusion.clone() {
         if !name.contains(&filter) {
           continue;
@@ -169,7 +169,6 @@ fn main() {
     let re = Regex::new(r"(day\d{2})").expect("Failed to parse regex");
 
     for (name, command) in register.iter() {
-
       if let Some(filter) = args.filter_inclusion.clone() {
         if !name.contains(&filter) {
           continue;
