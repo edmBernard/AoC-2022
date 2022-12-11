@@ -22,7 +22,6 @@ struct Monkey {
 }
 
 /// like split_at_mut but we give 3 elems instead of 2 slice
-/// allow to divide by 2 the execution time
 fn take3_at_mut(
   values: &mut [Vec<u64>],
   index1: usize,
@@ -32,12 +31,12 @@ fn take3_at_mut(
   let len = values.len();
   let ptr = values.as_mut_ptr();
 
-  debug_assert!(index1 <= len);
-  debug_assert!(index2 <= len);
-  debug_assert!(index3 <= len);
-  debug_assert!(index1 != index2);
-  debug_assert!(index1 != index3);
-  debug_assert!(index2 != index3);
+  assert!(index1 <= len);
+  assert!(index2 <= len);
+  assert!(index3 <= len);
+  assert!(index1 != index2);
+  assert!(index1 != index3);
+  assert!(index2 != index3);
 
   unsafe { (&mut *ptr.add(index1), &mut *ptr.add(index2), &mut *ptr.add(index3)) }
 }
@@ -146,22 +145,21 @@ pub fn day11(filename: &Path) -> Result<ReturnType> {
   let mut monkey_inspection = vec![0; monkeys.len()];
   for _round in 0..10000 {
     for idx in 0..monkeys.len() {
+      // take3_at_mut is two time faster than the trick we need to work around it
+      // the part1 still use the trick
       let (current, if_true, if_false) = take3_at_mut(
         &mut items_part2,
         idx,
         monkeys[idx].monkey_if_true,
         monkeys[idx].monkey_if_false,
       );
-      // let current_items = items_part2[idx].clone();
       for item in current {
         monkey_inspection[idx] += 1;
         let worry_level = (monkeys[idx].operation)(*item);
         let after_bored = worry_level % ppcm;
         if (after_bored) % monkeys[idx].div_test == 0 {
-          // let monkey_index = monkeys[idx].monkey_if_true;
           if_true.push(after_bored);
         } else {
-          // let monkey_index = monkeys[idx].monkey_if_false;
           if_false.push(after_bored);
         }
       }
@@ -259,14 +257,7 @@ pub fn day11_speed(filename: &Path) -> Result<ReturnType> {
       monkey_if_false,
     })
   }
-  let total_count = items_part1.iter().flatten().count();
   let mut items_part2 = items_part1.clone();
-  for vec in &mut items_part2 {
-    vec.reserve(total_count);
-  }
-  // for vec in &mut items_part2 {
-  //   println!("capacity: {}", vec.capacity());
-  // }
 
   let mut monkey_inspection = vec![0; monkeys.len()];
   for _round in 0..20 {
@@ -300,13 +291,14 @@ pub fn day11_speed(filename: &Path) -> Result<ReturnType> {
   let mut monkey_inspection = vec![0; monkeys.len()];
   for _round in 0..10000 {
     for idx in 0..monkeys.len() {
+      // take3_at_mut is two time faster than the trick we need to work around it
+      // the part1 still use the trick
       let (current, if_true, if_false) = take3_at_mut(
         &mut items_part2,
         idx,
         monkeys[idx].monkey_if_true,
         monkeys[idx].monkey_if_false,
       );
-      // let current_items = items_part2[idx].clone();
       monkey_inspection[idx] += current.len();
       for item in current {
         let worry_level = match monkeys[idx].operation {
@@ -316,10 +308,8 @@ pub fn day11_speed(filename: &Path) -> Result<ReturnType> {
         };
         let after_bored = worry_level % ppcm;
         if (after_bored) % monkeys[idx].div_test == 0 {
-          // let monkey_index = monkeys[idx].monkey_if_true;
           if_true.push(after_bored);
         } else {
-          // let monkey_index = monkeys[idx].monkey_if_false;
           if_false.push(after_bored);
         }
       }
