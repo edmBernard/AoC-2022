@@ -62,8 +62,9 @@ days::day10::day10             in   43.77 us : part1=11720      part2=2
 days::day11::day11             in 6048.64 us : part1=117624     part2=16792940265
 
 In C++
-day01                          in 665.876 ms : part1=70720      part2=207148
-day02                          in 689.468 ms : part1=11475      part2=16862
-day03                          in 573.196 ms : part1=8202       part2=2864
-day04                          in 739.069 ms : part1=490        part2=921
+day01_speed_iter               in 66.7159 us : part1=70720      part2=207148
+day02                          in 67.3343 us : part1=11475      part2=16862
+day03                          in 55.5822 us : part1=8202       part2=2864
+day04                          in 72.6224 us : part1=490        part2=921
+day05                          in 78.4286 us : part1=ZWHVFWQWW  part2=HZFZCCWWV
 ```
