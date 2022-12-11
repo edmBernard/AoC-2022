@@ -21,6 +21,27 @@ struct Monkey {
   monkey_if_false: usize,
 }
 
+/// like split_at_mut but we give 3 elems instead of 2 slice
+/// allow to divide by 2 the execution time
+fn take3_at_mut(
+  values: &mut [Vec<u64>],
+  index1: usize,
+  index2: usize,
+  index3: usize,
+) -> (&mut Vec<u64>, &mut Vec<u64>, &mut Vec<u64>) {
+  let len = values.len();
+  let ptr = values.as_mut_ptr();
+
+  debug_assert!(index1 <= len);
+  debug_assert!(index2 <= len);
+  debug_assert!(index3 <= len);
+  debug_assert!(index1 != index2);
+  debug_assert!(index1 != index3);
+  debug_assert!(index2 != index3);
+
+  unsafe { (&mut *ptr.add(index1), &mut *ptr.add(index2), &mut *ptr.add(index3)) }
+}
+
 pub fn day11(filename: &Path) -> Result<ReturnType> {
   let mut monkeys: Vec<Monkey> = Vec::new();
   let mut ppcm = 1;
@@ -54,9 +75,6 @@ pub fn day11(filename: &Path) -> Result<ReturnType> {
       .split(", ")
       .map(|elem| elem.parse::<u64>())
       .flatten()
-      .collect::<Vec<_>>()
-      .into_iter()
-      .rev()
       .collect::<Vec<_>>();
     items_part1.push(items);
 
@@ -103,18 +121,22 @@ pub fn day11(filename: &Path) -> Result<ReturnType> {
   let mut monkey_inspection = vec![0; monkeys.len()];
   for _round in 0..20 {
     for idx in 0..monkeys.len() {
-      while let Some(item) = items_part1[idx].pop() {
+      let current_items = items_part1[idx].clone();
+      // the order in which we read item don't matter
+      // either current_items or current_items.iter().rev() give the same result
+      for item in current_items {
         monkey_inspection[idx] += 1;
         let worry_level = (monkeys[idx].operation)(item);
-        let after_bored = worry_level/3;
+        let after_bored = worry_level / 3;
         if (after_bored) % monkeys[idx].div_test == 0 {
           let monkey_index = monkeys[idx].monkey_if_true;
-          items_part1[monkey_index].insert(0, after_bored);
+          items_part1[monkey_index].push(after_bored);
         } else {
           let monkey_index = monkeys[idx].monkey_if_false;
-          items_part1[monkey_index].insert(0, after_bored);
+          items_part1[monkey_index].push(after_bored);
         }
       }
+      items_part1[idx].clear();
     }
   }
   monkey_inspection.sort();
@@ -124,18 +146,26 @@ pub fn day11(filename: &Path) -> Result<ReturnType> {
   let mut monkey_inspection = vec![0; monkeys.len()];
   for _round in 0..10000 {
     for idx in 0..monkeys.len() {
-      while let Some(item) = items_part2[idx].pop() {
+      let (current, if_true, if_false) = take3_at_mut(
+        &mut items_part2,
+        idx,
+        monkeys[idx].monkey_if_true,
+        monkeys[idx].monkey_if_false,
+      );
+      // let current_items = items_part2[idx].clone();
+      for item in current {
         monkey_inspection[idx] += 1;
-        let worry_level = (monkeys[idx].operation)(item);
+        let worry_level = (monkeys[idx].operation)(*item);
         let after_bored = worry_level % ppcm;
         if (after_bored) % monkeys[idx].div_test == 0 {
-          let monkey_index = monkeys[idx].monkey_if_true;
-          items_part2[monkey_index].insert(0, after_bored);
+          // let monkey_index = monkeys[idx].monkey_if_true;
+          if_true.push(after_bored);
         } else {
-          let monkey_index = monkeys[idx].monkey_if_false;
-          items_part2[monkey_index].insert(0, after_bored);
+          // let monkey_index = monkeys[idx].monkey_if_false;
+          if_false.push(after_bored);
         }
       }
+      items_part2[idx].clear();
     }
   }
   monkey_inspection.sort();
@@ -143,6 +173,164 @@ pub fn day11(filename: &Path) -> Result<ReturnType> {
   let part2 = monkey_inspection[0] * monkey_inspection[1];
 
   Ok(ReturnType::Numeric(part1, part2))
+}
+
+enum Operation {
+  Mul,
+  Add,
+  Square,
+}
+
+struct MonkeySpeed {
+  operation: Operation,
+  operand: u64,
+  div_test: u64,
+  monkey_if_true: usize,
+  monkey_if_false: usize,
+}
+
+pub fn day11_speed(filename: &Path) -> Result<ReturnType> {
+  let mut monkeys: Vec<MonkeySpeed> = Vec::new();
+  let mut ppcm = 1;
+  let content = std::fs::read_to_string(filename)?;
+  let lines = &mut content.lines();
+
+  // Monkey 0:
+  let line_header = Regex::new(r"Monkey \d:")?;
+  //   Starting items: 79, 98
+  let line_items = Regex::new(r"((,? \d+)+)")?;
+  //   Operation: new = old * 19
+  let line_operation = Regex::new(r"new = old ([+\-*]) (old|\d+)")?;
+  //   Test: divisible by 23
+  //     If true: throw to monkey 2
+  //     If false: throw to monkey 3
+  let line_test = Regex::new(r"(\d+)")?;
+
+  let mut items_part1 = Vec::new();
+  while let Some(line) = lines.next() {
+    if !line_header.is_match(line) {
+      continue;
+    }
+    // Parse items
+    let line = lines.next().ok_or("Missing items line")?;
+    let cap = line_items.captures(line).ok_or("Fail to capture")?;
+    let items = cap
+      .get(1)
+      .ok_or("Fail to capture items")?
+      .as_str()
+      .trim()
+      .split(", ")
+      .map(|elem| elem.parse::<u64>())
+      .flatten()
+      .collect::<Vec<_>>();
+    items_part1.push(items);
+
+    // Parse operation
+    let line = lines.next().ok_or("Missing operation line")?;
+    let cap = line_operation.captures(line).ok_or("Fail to capture operation")?;
+    let operation_str = cap.get(1).ok_or("Fail to capture operation")?.as_str();
+    let second_term_str = cap.get(2).ok_or("Fail to capture second terme")?.as_str();
+    let (operation, operand): (Operation, u64) = match (operation_str, second_term_str) {
+      ("*", "old") => (Operation::Square, 0),
+      ("*", term) => (Operation::Mul, term.parse::<u64>()?),
+      ("+", term) => (Operation::Add, term.parse::<u64>()?),
+      _ => panic!("Unsupported operation"),
+    };
+
+    // Parse test
+    let line = lines.next().ok_or("Missing test line")?;
+    let cap = line_test.captures(line).ok_or("Fail to capture test")?;
+    let div_test = cap.get(1).ok_or("Fail to capture test")?.as_str().parse::<u64>()?;
+    ppcm *= div_test;
+
+    let line = lines.next().ok_or("Missing true line")?;
+    let cap = line_test.captures(line).ok_or("Fail to capture test true")?;
+    let monkey_if_true = cap.get(1).ok_or("Fail to capture test")?.as_str().parse::<usize>()?;
+
+    let line = lines.next().ok_or("Missing false line")?;
+    let cap = line_test.captures(line).ok_or("Fail to capture test false")?;
+    let monkey_if_false = cap.get(1).ok_or("Fail to capture test")?.as_str().parse::<usize>()?;
+
+    monkeys.push(MonkeySpeed {
+      operation,
+      operand,
+      div_test,
+      monkey_if_true,
+      monkey_if_false,
+    })
+  }
+  let total_count = items_part1.iter().flatten().count();
+  let mut items_part2 = items_part1.clone();
+  for vec in &mut items_part2 {
+    vec.reserve(total_count);
+  }
+  // for vec in &mut items_part2 {
+  //   println!("capacity: {}", vec.capacity());
+  // }
+
+  let mut monkey_inspection = vec![0; monkeys.len()];
+  for _round in 0..20 {
+    for idx in 0..monkeys.len() {
+      let current_items = items_part1[idx].clone();
+      // the order in which we read item don't matter
+      // either current_items or current_items.iter().rev() give the same result
+      monkey_inspection[idx] += current_items.len();
+      for item in current_items {
+        let worry_level = match monkeys[idx].operation {
+          Operation::Add => item + monkeys[idx].operand,
+          Operation::Mul => item * monkeys[idx].operand,
+          Operation::Square => item * item,
+        };
+        let after_bored = worry_level / 3;
+        if (after_bored) % monkeys[idx].div_test == 0 {
+          let monkey_index = monkeys[idx].monkey_if_true;
+          items_part1[monkey_index].push(after_bored);
+        } else {
+          let monkey_index = monkeys[idx].monkey_if_false;
+          items_part1[monkey_index].push(after_bored);
+        }
+      }
+      items_part1[idx].clear();
+    }
+  }
+  monkey_inspection.sort();
+  monkey_inspection.reverse();
+  let part1 = monkey_inspection[0] * monkey_inspection[1];
+
+  let mut monkey_inspection = vec![0; monkeys.len()];
+  for _round in 0..10000 {
+    for idx in 0..monkeys.len() {
+      let (current, if_true, if_false) = take3_at_mut(
+        &mut items_part2,
+        idx,
+        monkeys[idx].monkey_if_true,
+        monkeys[idx].monkey_if_false,
+      );
+      // let current_items = items_part2[idx].clone();
+      monkey_inspection[idx] += current.len();
+      for item in current {
+        let worry_level = match monkeys[idx].operation {
+          Operation::Add => *item + monkeys[idx].operand,
+          Operation::Mul => *item * monkeys[idx].operand,
+          Operation::Square => *item * *item,
+        };
+        let after_bored = worry_level % ppcm;
+        if (after_bored) % monkeys[idx].div_test == 0 {
+          // let monkey_index = monkeys[idx].monkey_if_true;
+          if_true.push(after_bored);
+        } else {
+          // let monkey_index = monkeys[idx].monkey_if_false;
+          if_false.push(after_bored);
+        }
+      }
+      items_part2[idx].clear();
+    }
+  }
+  monkey_inspection.sort();
+  monkey_inspection.reverse();
+  let part2 = monkey_inspection[0] * monkey_inspection[1];
+
+  Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
 
 #[cfg(test)]
