@@ -42,7 +42,7 @@ The executable is named `AoC-2022`. Inputs path can be specified as argument or 
 | Day09 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/9 ) [<sup>solution</sup>](src/days/day09.rs) | Move rope                    | Using a big vec instead of HashSet |
 | Day10 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/10) [<sup>solution</sup>](src/days/day10.rs) | cycle synchronisation in CRT | part2 is a visual solution  |
 | Day11 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/11) [<sup>solution</sup>](src/days/day11.rs) | Monkey pass | part2 overflow so we use Least common multiple-like to reduce worry level at each pass |
-| Day12 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/12) [<sup>solution</sup>](src/days/day12.rs) | Search path algorithm | For part2 we can customise cost to avoid the computation for each a |
+| Day12 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/12) [<sup>solution</sup>](src/days/day12.rs) | Search path algorithm (Dijkstra) | For part2 we can customise cost to avoid the computation for each a |
 
 
 ## Some Timing on `10'000` run :
