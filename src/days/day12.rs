@@ -166,23 +166,23 @@ pub fn day12_speed(filename: &Path) -> Result<ReturnType> {
     }
   }
 
-  // Dijkstra’s Algorithm
+  // BFS / Dijkstra’s Algorithm
   // https://www.redblobgames.com/pathfinding/a-star/introduction.html
   let mut part1 = 0;
   let mut part2 = 0;
 
   // contain points and associated cost of all the points in the frontier.
-  // It allow to sort by cost (Dijkstra)
+  // BFS is enough as we don't have different weight per path
   let mut frontier = Vec::new();
-  frontier.push((end, 0));
+  frontier.push(end);
 
   // contain the point and the associated cost
   let mut cost_so_far = HashMap::new();
   cost_so_far.insert(end, 0);
 
-  while let Some((current, _)) = frontier.pop() {
+  while let Some(current) = frontier.pop() {
     for next in get_neighbor(current, board.width, board.get_height()) {
-      if board.get(&next) < board.get(&current) - 1 {
+      if board.get(&next) + 1 < board.get(&current) {
         continue;
       }
       let current_cost = cost_so_far.get(&current).ok_or("Previous pos not found")?;
@@ -191,7 +191,7 @@ pub fn day12_speed(filename: &Path) -> Result<ReturnType> {
 
       if !cost_so_far.contains_key(&next) || new_cost < *cost_so_far.get(&next).ok_or("Previous pos not found")? {
         cost_so_far.insert(next, new_cost);
-        frontier.push((next, new_cost));
+        frontier.insert(0, next);
       }
     }
     if part2 == 0 && board.get(&current) == 0 {
@@ -201,7 +201,6 @@ pub fn day12_speed(filename: &Path) -> Result<ReturnType> {
       part1 = *cost_so_far.get(&current).ok_or("No start value")?;
       break;
     }
-    frontier.sort_unstable_by(|a, b| b.1.cmp(&a.1));
   }
 
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
