@@ -290,30 +290,31 @@ pub fn day11_speed(filename: &Path) -> Result<ReturnType> {
 
   let mut monkey_inspection = vec![0; monkeys.len()];
   for _round in 0..10000 {
-    for idx in 0..monkeys.len() {
+    for (idx, monkey) in monkeys.iter().enumerate() {
       // take3_at_mut is two time faster than the trick we need to work around it
       // the part1 still use the trick
       let (current, if_true, if_false) = take3_at_mut(
         &mut items_part2,
         idx,
-        monkeys[idx].monkey_if_true,
-        monkeys[idx].monkey_if_false,
+        monkey.monkey_if_true,
+        monkey.monkey_if_false,
       );
       monkey_inspection[idx] += current.len();
-      for item in current {
-        let worry_level = match monkeys[idx].operation {
-          Operation::Add => *item + monkeys[idx].operand,
-          Operation::Mul => *item * monkeys[idx].operand,
-          Operation::Square => *item * *item,
+      // it seem drain(..) is slower than loop+clear
+      for item in &*current {
+        let worry_level = match monkey.operation {
+          Operation::Add => item + monkey.operand,
+          Operation::Mul => item * monkey.operand,
+          Operation::Square => item * item,
         };
         let after_bored = worry_level % ppcm;
-        if after_bored % monkeys[idx].div_test == 0 {
+        if after_bored % monkey.div_test == 0 {
           if_true.push(after_bored);
         } else {
           if_false.push(after_bored);
         }
       }
-      items_part2[idx].clear();
+      current.clear();
     }
   }
   monkey_inspection.sort();
@@ -332,5 +333,7 @@ mod tests {
   add_test!(
     main:   day11,        "data/day11.txt",       [117624, 16792940265];
     test1:  day11,        "data/day11_test1.txt", [10605, 2713310158];
+    main:   day11_speed,  "data/day11.txt",       [117624, 16792940265];
+    test1:  day11_speed,  "data/day11_test1.txt", [10605, 2713310158];
   );
 }
