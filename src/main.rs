@@ -113,7 +113,8 @@ fn main() {
     days::day10::day10,
     days::day11::day11,
     days::day11::day11_speed,
-    days::day12::day12
+    days::day12::day12,
+    days::day12::day12_speed
     // days::day13::day13,
     // days::day14::day14,
     // days::day15::day15,

@@ -143,6 +143,66 @@ pub fn day12(filename: &Path) -> Result<ReturnType> {
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
 
+pub fn day12_speed(filename: &Path) -> Result<ReturnType> {
+  let mut board = Board {
+    data: Vec::new(),
+    width: 0,
+  };
+  let mut start = (0, 0);
+  let mut end = (0, 0);
+  for line in std::fs::read_to_string(filename)?.lines() {
+    if board.width == 0 {
+      board.width = line.chars().count();
+    }
+    for elevation in line.chars() {
+      if elevation == 'S' {
+        start = (board.data.len() % board.width, board.data.len() / board.width);
+        board.data.push(0);
+      } else if elevation == 'E' {
+        end = (board.data.len() % board.width, board.data.len() / board.width);
+        board.data.push(26);
+      } else {
+        board.data.push((elevation as u32 - 'a' as u32) as u8);
+      }
+    }
+  }
+
+  // Dijkstra’s Algorithm
+  // https://www.redblobgames.com/pathfinding/a-star/introduction.html
+  let mut part1 = 0;
+  let mut part2 = 0;
+  let mut frontier = Vec::new();
+  frontier.push((end, 0));
+  let mut cost_so_far = HashMap::new();
+  cost_so_far.insert(end, 0);
+
+  while let Some((current, _)) = frontier.pop() {
+    for next in get_neighbor(current.0, current.1, board.width, board.get_height()) {
+      if board.get(next.0, next.1) < board.get(current.0, current.1) - 1 {
+        continue;
+      }
+      let current_cost = cost_so_far.get(&current).ok_or("Previous pos not found")?;
+
+      let new_cost = current_cost + 1;
+
+      if !cost_so_far.contains_key(&next) || new_cost < *cost_so_far.get(&next).ok_or("Previous pos not found")? {
+        cost_so_far.insert(next, new_cost);
+        frontier.push((next, new_cost));
+      }
+    }
+    if part2 == 0 && board.get(current.0, current.1) == 0 {
+      part2 = *cost_so_far.get(&current).ok_or("No start value")?;
+    }
+    if part1 == 0 && start == current {
+      part1 = *cost_so_far.get(&current).ok_or("No start value")?;
+      break;
+    }
+    frontier.sort_by(|a, b| b.1.cmp(&a.1));
+  }
+
+  Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

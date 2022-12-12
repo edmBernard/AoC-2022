@@ -42,7 +42,7 @@ The executable is named `AoC-2022`. Inputs path can be specified as argument or 
 | Day09 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/9 ) [<sup>solution</sup>](src/days/day09.rs) | Move rope                    | Using a big vec instead of HashSet |
 | Day10 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/10) [<sup>solution</sup>](src/days/day10.rs) | cycle synchronisation in CRT | part2 is a visual solution  |
 | Day11 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/11) [<sup>solution</sup>](src/days/day11.rs) | Monkey pass | part2 overflow so we use Least common multiple-like to reduce worry level at each pass |
-| Day12 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/12) [<sup>solution</sup>](src/days/day12.rs) | Search path algorithm (Dijkstra) | For part2 we can customise cost to avoid the computation for each a |
+| Day12 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/12) [<sup>solution</sup>](src/days/day12.rs) | Search path algorithm (Dijkstra) | Start from the End and different stop condition for part1 and part2 |
 
 
 ## Some Timing on `10'000` run :
@@ -60,7 +60,7 @@ days::day08::day08_speed       in  257.59 us : part1=1688       part2=410400
 days::day09::day09_speed       in  383.57 us : part1=6503       part2=2724
 days::day10::day10             in   43.77 us : part1=11720      part2=2
 days::day11::day11_speed       in 2039.97 us : part1=117624     part2=16792940265
-days::day12::day12             in 5970.77 us : part1=437        part2=430
+days::day12::day12_speed       in 2379.84 us : part1=437        part2=430
 
 In C++
 day01_speed_iter               in 66.7159 us : part1=70720      part2=207148
