@@ -13,15 +13,15 @@ struct Board {
 }
 
 trait BoardTrait {
-  fn get(&self, x: usize, y: usize) -> u8;
+  fn get(&self, pos: &(usize, usize)) -> u8;
   fn get_mut(&mut self, x: usize, y: usize) -> &mut u8;
   fn get_height(&mut self) -> usize;
   fn get_offset(&self, x: usize, y: usize) -> usize;
 }
 
 impl BoardTrait for Board {
-  fn get(&self, x: usize, y: usize) -> u8 {
-    self.data[x + y * self.width]
+  fn get(&self, pos: &(usize, usize)) -> u8 {
+    self.data[pos.0 + pos.1 * self.width]
   }
   fn get_mut(&mut self, x: usize, y: usize) -> &mut u8 {
     let w = self.width;
@@ -42,19 +42,19 @@ impl std::fmt::Display for Board {
         write!(f, "\n")?
       }
       for w in 0..self.width {
-        write!(f, "{} ", self.get(w, h))?
+        write!(f, "{} ", self.get(&(w, h)))?
       }
     }
     Ok(())
   }
 }
 
-fn get_neighbor(x: usize, y: usize, width: usize, height: usize) -> [(usize, usize); 4] {
+fn get_neighbor(pos : (usize, usize), width: usize, height: usize) -> [(usize, usize); 4] {
   return [
-    (if x < width - 1 { x + 1 } else { x }, y),
-    (if x > 0 { x - 1 } else { x }, y),
-    (x, if y < height - 1 { y + 1 } else { y }),
-    (x, if y > 0 { y - 1 } else { y }),
+    (if pos.0 < width - 1 { pos.0 + 1 } else { pos.0 }, pos.1),
+    (if pos.0 > 0 { pos.0 - 1 } else { pos.0 }, pos.1),
+    (pos.0, if pos.1 < height - 1 { pos.1 + 1 } else { pos.1 }),
+    (pos.0, if pos.1 > 0 { pos.1 - 1 } else { pos.1 }),
   ];
 }
 
@@ -85,11 +85,9 @@ pub fn day12(filename: &Path) -> Result<ReturnType> {
   let mut part1 = 0;
   let mut part2 = 0;
   for is_part1 in [false, true] {
-    // TODO: make part1 and part2 in one loop
     let mut frontier = Vec::new();
     frontier.push((start, 0));
     let mut came_from = HashMap::new();
-    // TODO: maybe we don't need came_from as we only need the len() not the path
     came_from.insert(start, None);
     let mut cost_so_far = HashMap::new();
     cost_so_far.insert(start, 0);
@@ -99,8 +97,8 @@ pub fn day12(filename: &Path) -> Result<ReturnType> {
         break;
       }
 
-      for next in get_neighbor(current.0, current.1, board.width, board.get_height()) {
-        if board.get(next.0, next.1) > board.get(current.0, current.1) + 1 {
+      for next in get_neighbor(current, board.width, board.get_height()) {
+        if board.get(&next) > board.get(&current) + 1 {
           continue;
         }
         let current_cost = cost_so_far.get(&current).ok_or("Previous pos not found")?;
@@ -109,7 +107,7 @@ pub fn day12(filename: &Path) -> Result<ReturnType> {
           current_cost + 1
         } else {
           // if the elevation is 0 (aka. a) we put a cost of 0.
-          if board.get(current.0, current.1) == 0 {
+          if board.get(&current) == 0 {
             0
           } else {
             current_cost + 1
@@ -143,6 +141,7 @@ pub fn day12(filename: &Path) -> Result<ReturnType> {
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
 
+// Speed up found by starting for the end up to the start (part1) or 0 (part2)
 pub fn day12_speed(filename: &Path) -> Result<ReturnType> {
   let mut board = Board {
     data: Vec::new(),
@@ -171,14 +170,19 @@ pub fn day12_speed(filename: &Path) -> Result<ReturnType> {
   // https://www.redblobgames.com/pathfinding/a-star/introduction.html
   let mut part1 = 0;
   let mut part2 = 0;
+
+  // contain points and associated cost of all the points in the frontier.
+  // It allow to sort by cost (Dijkstra)
   let mut frontier = Vec::new();
   frontier.push((end, 0));
+
+  // contain the point and the associated cost
   let mut cost_so_far = HashMap::new();
   cost_so_far.insert(end, 0);
 
   while let Some((current, _)) = frontier.pop() {
-    for next in get_neighbor(current.0, current.1, board.width, board.get_height()) {
-      if board.get(next.0, next.1) < board.get(current.0, current.1) - 1 {
+    for next in get_neighbor(current, board.width, board.get_height()) {
+      if board.get(&next) < board.get(&current) - 1 {
         continue;
       }
       let current_cost = cost_so_far.get(&current).ok_or("Previous pos not found")?;
@@ -190,14 +194,14 @@ pub fn day12_speed(filename: &Path) -> Result<ReturnType> {
         frontier.push((next, new_cost));
       }
     }
-    if part2 == 0 && board.get(current.0, current.1) == 0 {
+    if part2 == 0 && board.get(&current) == 0 {
       part2 = *cost_so_far.get(&current).ok_or("No start value")?;
     }
     if part1 == 0 && start == current {
       part1 = *cost_so_far.get(&current).ok_or("No start value")?;
       break;
     }
-    frontier.sort_by(|a, b| b.1.cmp(&a.1));
+    frontier.sort_unstable_by(|a, b| b.1.cmp(&a.1));
   }
 
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
@@ -212,5 +216,7 @@ mod tests {
   add_test!(
     main:   day12,        "data/day12.txt",       [437, 430];
     test1:  day12,        "data/day12_test1.txt", [31, 29];
+    main:   day12_speed,  "data/day12.txt",       [437, 430];
+    test1:  day12_speed,  "data/day12_test1.txt", [31, 29];
   );
 }
