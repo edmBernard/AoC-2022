@@ -76,15 +76,8 @@ pub fn day14(filename: &Path) -> Result<ReturnType> {
     MinMax(x, y) => (x, y),
   };
 
-  rock_shapes.push(Vec::new());
-  let length = rock_shapes.len();
-  rock_shapes[length - 1].push((500-max_y-2, max_y + 2));
-  rock_shapes[length - 1].push((500+max_y+2, max_y + 2));
-  let max_y = max_y + 2;
-  let min_x = 500-max_y-1;
-  let max_x = 500+max_y+1;
-
-  let mut board = Board {
+  // Fill Board Part1
+  let mut board_part1 = Board {
     data: vec!['.'; ((max_x - min_x + 1) * (max_y - 0 + 1)) as usize],
     width: (max_x - min_x + 1) as usize,
     offset: (min_x as usize, 0 as usize),
@@ -102,62 +95,140 @@ pub fn day14(filename: &Path) -> Result<ReturnType> {
       let step_y = (y_max - y_min).min(1);
       if step_x == 0 {
         for y in (*y_min..=*y_max).step_by(step_y as usize) {
-          *board.get_with_offset_mut(*x_min as usize, y as usize) = '#';
+          *board_part1.get_with_offset_mut(*x_min as usize, y as usize) = '#';
         }
       }
 
       if step_y == 0 {
         for x in (*x_min..=*x_max).step_by(step_x as usize) {
-          *board.get_with_offset_mut(x as usize, *y_min as usize) = '#';
+          *board_part1.get_with_offset_mut(x as usize, *y_min as usize) = '#';
         }
       }
     }
   }
 
-  println!("{}", board);
+  // Fill Board Part2 with the extra floor
+  rock_shapes.push(Vec::new());
+  let length = rock_shapes.len();
+  rock_shapes[length - 1].push((500-max_y-2, max_y + 2));
+  rock_shapes[length - 1].push((500+max_y+2, max_y + 2));
+  let max_y = max_y + 2;
+  let min_x = 500-max_y-1;
+  let max_x = 500+max_y+1;
+
+  let mut board_part2 = Board {
+    data: vec!['.'; ((max_x - min_x + 1) * (max_y - 0 + 1)) as usize],
+    width: (max_x - min_x + 1) as usize,
+    offset: (min_x as usize, 0 as usize),
+  };
+
+  for rock_shape in &rock_shapes {
+    for ((x1, y1), (x2, y2)) in rock_shape.iter().tuple_windows::<(_, _)>() {
+      let x_min = x1.min(x2);
+      let y_min = y1.min(y2);
+
+      let x_max = x1.max(x2);
+      let y_max = y1.max(y2);
+
+      let step_x = (x_max - x_min).min(1);
+      let step_y = (y_max - y_min).min(1);
+      if step_x == 0 {
+        for y in (*y_min..=*y_max).step_by(step_y as usize) {
+          *board_part2.get_with_offset_mut(*x_min as usize, y as usize) = '#';
+        }
+      }
+
+      if step_y == 0 {
+        for x in (*x_min..=*x_max).step_by(step_x as usize) {
+          *board_part2.get_with_offset_mut(x as usize, *y_min as usize) = '#';
+        }
+      }
+    }
+  }
+
+  // Run part1 simulation
   // launch particules
   let mut part1 = 0;
   'block: {
     loop {
       let mut particule = (500, 0);
-      if board.get_with_offset(&particule) != '.' {
+      if board_part1.get_with_offset(&particule) != '.' {
         break;
       }
       // move particule
       loop {
         let new_position = (particule.0, particule.1 + 1);
-        if board.out_of_bound(&new_position) {
+        if board_part1.out_of_bound(&new_position) {
           break 'block;
         }
-        if board.get_with_offset(&new_position) == '.' {
+        if board_part1.get_with_offset(&new_position) == '.' {
           particule = new_position;
           continue;
         }
         let new_position = (particule.0 - 1, particule.1 + 1);
-        if board.out_of_bound(&new_position) {
+        if board_part1.out_of_bound(&new_position) {
           break 'block;
         }
-        if board.get_with_offset(&new_position) == '.' {
+        if board_part1.get_with_offset(&new_position) == '.' {
           particule = new_position;
           continue;
         }
         let new_position = (particule.0 + 1, particule.1 + 1);
-        if board.out_of_bound(&new_position) {
+        if board_part1.out_of_bound(&new_position) {
           break 'block;
         }
-        if board.get_with_offset(&new_position) == '.' {
+        if board_part1.get_with_offset(&new_position) == '.' {
           particule = new_position;
           continue;
         }
-        *board.get_with_offset_mut(particule.0, particule.1) = 'o';
+        *board_part1.get_with_offset_mut(particule.0, particule.1) = 'o';
         part1 += 1;
         break;
       }
     }
   }
-  println!("{}", board);
-
+  // Run part2 simulation
+  // launch particules
   let mut part2 = 0;
+  'block: {
+    loop {
+      let mut particule = (500, 0);
+      if board_part2.get_with_offset(&particule) != '.' {
+        break;
+      }
+      // move particule
+      loop {
+        let new_position = (particule.0, particule.1 + 1);
+        if board_part2.out_of_bound(&new_position) {
+          break 'block;
+        }
+        if board_part2.get_with_offset(&new_position) == '.' {
+          particule = new_position;
+          continue;
+        }
+        let new_position = (particule.0 - 1, particule.1 + 1);
+        if board_part2.out_of_bound(&new_position) {
+          break 'block;
+        }
+        if board_part2.get_with_offset(&new_position) == '.' {
+          particule = new_position;
+          continue;
+        }
+        let new_position = (particule.0 + 1, particule.1 + 1);
+        if board_part2.out_of_bound(&new_position) {
+          break 'block;
+        }
+        if board_part2.get_with_offset(&new_position) == '.' {
+          particule = new_position;
+          continue;
+        }
+        *board_part2.get_with_offset_mut(particule.0, particule.1) = 'o';
+        part2 += 1;
+        break;
+      }
+    }
+  }
+
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
 
@@ -168,7 +239,7 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    main:   day14,        "data/day14.txt",       [437, 430];
-    test1:  day14,        "data/day14_test1.txt", [31, 29];
+    main:   day14,        "data/day14.txt",       [1003, 25771];
+    test1:  day14,        "data/day14_test1.txt", [24, 93];
   );
 }

@@ -64,7 +64,7 @@ macro_rules! register_command {
 /// * `name` - name of the command
 fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &str) -> Option<u128> {
   let now = Instant::now();
-  const NRUN: u32 = 1;
+  const NRUN: u32 = 10000;
   for _ in 0..NRUN-1 {
     _ = command(filepath);
   }
@@ -76,7 +76,7 @@ fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &
         ReturnType::String(part1, part2) => (format!("{}", part1), format!("{}", part2)),
       };
       println!(
-        "{: <30} in {:>7.2} us : part1={:<10} part2={:<10}",
+        "{: <30} in {:>8.2} us : part1={:<10} part2={:<10}",
         name,
         duration as f32 / NRUN as f32,
         part1,
