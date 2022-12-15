@@ -1,6 +1,7 @@
 // #![allow(unused_variables)]
 
-use std::collections::HashMap;
+use itertools::Itertools;
+use itertools::MinMaxResult::{MinMax, NoElements, OneElement};
 use std::path::Path;
 
 use crate::utils::ReturnType;
@@ -8,22 +9,15 @@ use crate::Result;
 
 #[derive(Debug, Clone)]
 struct Board {
-  data: Vec<u8>,
+  data: Vec<char>,
   width: usize,
 }
 
-trait BoardTrait {
-  fn get(&self, pos: &(usize, usize)) -> u8;
-  fn get_mut(&mut self, x: usize, y: usize) -> &mut u8;
-  fn get_height(&mut self) -> usize;
-  fn get_offset(&self, x: usize, y: usize) -> usize;
-}
-
-impl BoardTrait for Board {
-  fn get(&self, pos: &(usize, usize)) -> u8 {
+impl Board {
+  fn get(&self, pos: &(usize, usize)) -> char {
     self.data[pos.0 + pos.1 * self.width]
   }
-  fn get_mut(&mut self, x: usize, y: usize) -> &mut u8 {
+  fn get_mut(&mut self, x: usize, y: usize) -> &mut char {
     let w = self.width;
     &mut self.data[x + y * w]
   }
@@ -49,98 +43,66 @@ impl std::fmt::Display for Board {
   }
 }
 
-fn get_neighbor(pos : (usize, usize), width: usize, height: usize) -> [(usize, usize); 4] {
-  return [
-    (if pos.0 < width - 1 { pos.0 + 1 } else { pos.0 }, pos.1),
-    (if pos.0 > 0 { pos.0 - 1 } else { pos.0 }, pos.1),
-    (pos.0, if pos.1 < height - 1 { pos.1 + 1 } else { pos.1 }),
-    (pos.0, if pos.1 > 0 { pos.1 - 1 } else { pos.1 }),
-  ];
-}
-
 pub fn day14(filename: &Path) -> Result<ReturnType> {
-  let mut board = Board {
-    data: Vec::new(),
-    width: 0,
-  };
-  let mut start = (0, 0);
-  let mut end = (0, 0);
+  let mut rock_shapes = Vec::new();
   for line in std::fs::read_to_string(filename)?.lines() {
-    if board.width == 0 {
-      board.width = line.chars().count();
+    rock_shapes.push(Vec::new());
+    for point_str in line.split("->") {
+      let mut point_split = point_str.split(",");
+      let x = point_split.next().ok_or("Missing x for point")?.trim().parse::<i32>()?;
+      let y = point_split.next().ok_or("Missing y for point")?.trim().parse::<i32>()?;
+      let length = rock_shapes.len();
+      rock_shapes[length - 1].push((x, y));
     }
-    for elevation in line.chars() {
-      if elevation == 'S' {
-        start = (board.data.len() % board.width, board.data.len() / board.width);
-        board.data.push(0);
-      } else if elevation == 'E' {
-        end = (board.data.len() % board.width, board.data.len() / board.width);
-        board.data.push(26);
-      } else {
-        board.data.push((elevation as u32 - 'a' as u32) as u8);
+  }
+  let (min_x, max_x) = match rock_shapes.iter().flatten().map(|elem| elem.0).minmax() {
+    NoElements => panic!("NoMinMax"),
+    OneElement(x) => (x, x),
+    MinMax(x, y) => (x, y),
+  };
+  let (min_y, max_y) = match rock_shapes.iter().flatten().map(|elem| elem.1).minmax() {
+    NoElements => panic!("NoMinMax"),
+    OneElement(x) => (x, x),
+    MinMax(x, y) => (x, y),
+  };
+
+  let mut board = Board {
+    data: vec!['.'; ((max_x - min_x + 1) * (max_y - min_y + 1)) as usize],
+    width: (max_x - min_x + 1) as usize,
+  };
+
+  for rock_shape in &rock_shapes {
+    for ((x1, y1), (x2, y2)) in rock_shape.iter().tuple_windows::<(_, _)>() {
+      let x_min = x1.min(x2);
+      let y_min = y1.min(y2);
+
+      let x_max = x1.max(x2);
+      let y_max = y1.max(y2);
+
+      let step_x = (x_max - x_min).min(1);
+      let step_y = (y_max - y_min).min(1);
+      if step_x == 0 {
+        for y in (*y_min..*y_max).step_by(step_y as usize) {
+          *board.get_mut((*x_min - min_x) as usize, (y - min_y) as usize) = '#';
+        }
+      }
+
+      if step_y == 0 {
+        for x in (*x_min..*x_max).step_by(step_x as usize) {
+          *board.get_mut((x - min_x) as usize, (*y_min - min_y) as usize) = '#';
+        }
       }
     }
   }
+  for x in min_x..=max_x {
+    for y in min_y..=max_y {}
+  }
+  println!("{}", board);
 
   let mut part1 = 0;
   let mut part2 = 0;
-  for is_part1 in [false, true] {
-    let mut frontier = Vec::new();
-    frontier.push((start, 0));
-    let mut came_from = HashMap::new();
-    came_from.insert(start, None);
-    let mut cost_so_far = HashMap::new();
-    cost_so_far.insert(start, 0);
-
-    while let Some((current, _)) = frontier.pop() {
-      if end == current {
-        break;
-      }
-
-      for next in get_neighbor(current, board.width, board.get_height()) {
-        if board.get(&next) > board.get(&current) + 1 {
-          continue;
-        }
-        let current_cost = cost_so_far.get(&current).ok_or("Previous pos not found")?;
-
-        let new_cost = if is_part1 {
-          current_cost + 1
-        } else {
-          // if the elevation is 0 (aka. a) we put a cost of 0.
-          if board.get(&current) == 0 {
-            0
-          } else {
-            current_cost + 1
-          }
-        };
-
-        if !came_from.contains_key(&next) || new_cost < *cost_so_far.get(&next).ok_or("Previous pos not found")? {
-          cost_so_far.insert(next, new_cost);
-          frontier.push((next, new_cost));
-          came_from.insert(next, Some(current));
-        }
-      }
-      frontier.sort_by(|a, b| b.1.cmp(&a.1));
-    }
-
-    let mut current = end;
-    let mut path = Vec::new();
-    while current != start {
-      path.push(current);
-      let Some(&Some(temp)) = came_from.get(&current) else {
-      panic!("No source found")
-    };
-      current = temp;
-    }
-    if is_part1 {
-      part1 = path.len();
-    } else {
-      part2 = cost_so_far.get(&end).ok_or("No end value")? + 1;
-    }
-  }
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
-
 
 #[cfg(test)]
 mod tests {

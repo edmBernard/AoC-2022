@@ -1,7 +1,6 @@
 // #![allow(unused_variables)]
 
 use regex::Regex;
-use std::collections::HashSet;
 use std::iter::zip;
 use std::path::Path;
 
