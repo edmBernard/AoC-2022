@@ -58,7 +58,7 @@ fn get_neighbor(pos : (usize, usize), width: usize, height: usize) -> [(usize, u
   ];
 }
 
-pub fn day13(filename: &Path) -> Result<ReturnType> {
+pub fn day14(filename: &Path) -> Result<ReturnType> {
   let mut board = Board {
     data: Vec::new(),
     width: 0,
@@ -149,7 +149,7 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    main:   day13,        "data/day13.txt",       [437, 430];
-    test1:  day13,        "data/day13_test1.txt", [31, 29];
+    main:   day14,        "data/day14.txt",       [437, 430];
+    test1:  day14,        "data/day14_test1.txt", [31, 29];
   );
 }
