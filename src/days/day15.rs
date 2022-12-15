@@ -24,8 +24,10 @@ pub fn day15(filename: &Path) -> Result<ReturnType> {
       .flatten()
       .collect::<Vec<_>>();
 
-    sensor_position.push((raw_position[0], raw_position[1]));
-    beacon_position.push((raw_position[2], raw_position[3]));
+    let sensor = (raw_position[0], raw_position[1]);
+    let beacon = (raw_position[2], raw_position[3]);
+    sensor_position.push((sensor, manhattan(sensor, beacon)));
+    beacon_position.push(beacon);
   }
 
   // Dirty switch as test and regular input don't have same condition
@@ -33,28 +35,31 @@ pub fn day15(filename: &Path) -> Result<ReturnType> {
   let search_dim: i32 = if filename.to_str().unwrap().contains("test") { 20 } else { 4000000 };
 
   // part1
-  let mut line_to_check = HashSet::new();
-  let mut beacon_in_line = HashSet::new();
-  for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
-    let radius = manhattan(*sensor, *beacon);
-    if line_index - sensor.1 > radius {
+  let mut line_to_check = Vec::new();
+  let mut beacon_in_line = Vec::new();
+
+  for ((sensor, radius), beacon) in zip(&sensor_position, &beacon_position) {
+    if line_index - sensor.1 > *radius {
       continue;
     }
     for x in sensor.0 - radius..sensor.0 + radius {
-      if manhattan(*sensor, (x, line_index)) <= radius {
-        line_to_check.insert(x);
+      if manhattan(*sensor, (x, line_index)) <= *radius {
+        line_to_check.push(x);
       }
       if beacon.1 == line_index {
-        beacon_in_line.insert(beacon.0);
+        beacon_in_line.push(beacon.0);
       }
     }
   }
+  line_to_check.sort();
+  line_to_check.dedup();
+  beacon_in_line.sort();
+  beacon_in_line.dedup();
   let part1 = line_to_check.len() - beacon_in_line.len();
 
   // part2
   let mut frontier_point = Vec::new();
-  for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
-    let radius = manhattan(*sensor, *beacon);
+  for (sensor, radius) in &sensor_position {
     for y in (sensor.1 - radius - 1).max(0)..(sensor.1 + radius + 1).min(search_dim) {
       let min_x = (sensor.0 - (radius + 1 - (sensor.1 - y).abs())).max(0);
       let max_x = (sensor.0 + (radius + 1 - (sensor.1 - y).abs())).min(search_dim);
@@ -65,9 +70,8 @@ pub fn day15(filename: &Path) -> Result<ReturnType> {
   let part2 = 'block: {
     for (x, y) in frontier_point {
       let mut current = 0;
-      for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
-        let radius = manhattan(*sensor, *beacon);
-        if manhattan(*sensor, (x, y)) <= radius {
+      for (sensor, radius) in &sensor_position {
+        if manhattan(*sensor, (x, y)) <= *radius {
           current += 1;
           break;
         }
@@ -206,6 +210,7 @@ pub fn day15_speed(filename: &Path) -> Result<ReturnType> {
   let search_dim: i32 = if filename.to_str().unwrap().contains("test") { 20 } else { 4000000 };
 
   // part1
+  // For part1 we directly merge range
   let mut ranges = Vec::new();
   let mut beacon_in_line = Vec::new();
   for ((sensor, radius), beacon) in zip(&sensor_position, &beacon_position) {
@@ -221,6 +226,7 @@ pub fn day15_speed(filename: &Path) -> Result<ReturnType> {
     ranges.push((min_x, max_x));
   }
   // Merge stored range directly
+  // We have to do several iteration to be sure we merge all possible case
   for _loop in 0..2 {
     for idx2 in 1..ranges.len() {
       let (range1, range2) = merge_range(ranges[0], ranges[idx2]);
@@ -233,6 +239,13 @@ pub fn day15_speed(filename: &Path) -> Result<ReturnType> {
   let part1 = (ranges[0].1 - ranges[0].0 + 1) as u64 - beacon_in_line.len() as u64;
 
   // part2
+  // for each sensor
+  //   for each pixel on the border of the sensor
+  //     for each sensor
+  //       if the pixel in radius
+  //          check
+  //     if the pixel is not in range of any sensor
+  //        we have the result
   let part2 = 'block: {
     for (sensor, radius) in &sensor_position {
       for y in (sensor.1 - radius - 1).max(0)..(sensor.1 + radius + 1).min(search_dim) {
