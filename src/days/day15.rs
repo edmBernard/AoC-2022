@@ -30,7 +30,7 @@ pub fn day15(filename: &Path) -> Result<ReturnType> {
 
   // Dirty switch as test and regular input don't have same condition
   let line_index: i32 = if filename.to_str().unwrap().contains("test") { 10 } else { 2000000 };
-  let search_dim: usize = if filename.to_str().unwrap().contains("test") { 20 } else { 4000000 };
+  let search_dim: i32 = if filename.to_str().unwrap().contains("test") { 20 } else { 4000000 };
 
   // part1
   let mut line_to_check = HashSet::new();
@@ -55,11 +55,11 @@ pub fn day15(filename: &Path) -> Result<ReturnType> {
   let mut frontier_point = Vec::new();
   for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
     let radius = manhattan(*sensor, *beacon);
-    for y in (sensor.1 - radius - 1).max(0)..(sensor.1 + radius + 1).min(search_dim as i32) {
-      let min_x = (sensor.0 - (radius + 1 - (sensor.1 - y).abs())).max(0) as usize;
-      let max_x = (sensor.0 + (radius + 1 - (sensor.1 - y).abs())).min(search_dim as i32) as usize;
-      frontier_point.push((min_x, y as usize));
-      frontier_point.push((max_x, y as usize));
+    for y in (sensor.1 - radius - 1).max(0)..(sensor.1 + radius + 1).min(search_dim) {
+      let min_x = (sensor.0 - (radius + 1 - (sensor.1 - y).abs())).max(0);
+      let max_x = (sensor.0 + (radius + 1 - (sensor.1 - y).abs())).min(search_dim);
+      frontier_point.push((min_x, y));
+      frontier_point.push((max_x, y));
     }
   }
   let part2 = 'block: {
@@ -67,7 +67,7 @@ pub fn day15(filename: &Path) -> Result<ReturnType> {
       let mut current = 0;
       for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
         let radius = manhattan(*sensor, *beacon);
-        if manhattan(*sensor, (x as i32, y as i32)) <= radius {
+        if manhattan(*sensor, (x, y)) <= radius {
           current += 1;
           break;
         }
@@ -81,6 +81,18 @@ pub fn day15(filename: &Path) -> Result<ReturnType> {
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
 
+/// Given two ranges return 1 or two non overlaping range
+fn merge_range(range1:(i32, i32), range2:(i32, i32)) -> ((i32, i32), (i32, i32))
+{
+  //   range1     0-------1
+  //   range2              0-----------1
+  if range1.1 < range2.0 - 1 || range2.1 < range1.0 - 1 {
+    (range1, range2)
+  } else {
+    ((range1.0.min(range2.0), range1.1.max(range2.1)), (0, 0))
+  }
+}
+
 pub fn day15_speed(filename: &Path) -> Result<ReturnType> {
   let mut beacon_position = Vec::new();
   let mut sensor_position = Vec::new();
@@ -92,8 +104,10 @@ pub fn day15_speed(filename: &Path) -> Result<ReturnType> {
       .flatten()
       .collect::<Vec<_>>();
 
-    sensor_position.push((raw_position[0], raw_position[1]));
-    beacon_position.push((raw_position[2], raw_position[3]));
+    let sensor = (raw_position[0], raw_position[1]);
+    let beacon = (raw_position[2], raw_position[3]);
+    sensor_position.push((sensor, manhattan(sensor, beacon)));
+    beacon_position.push(beacon);
   }
 
   // Dirty switch as test and regular input don't have same condition
@@ -101,61 +115,61 @@ pub fn day15_speed(filename: &Path) -> Result<ReturnType> {
   let search_dim: usize = if filename.to_str().unwrap().contains("test") { 20 } else { 4000000 };
 
   // part1
-  let mut line_to_check = Vec::new();
+  let mut ranges = Vec::new();
   let mut beacon_in_line = Vec::new();
-  for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
-    let radius = manhattan(*sensor, *beacon);
-    if line_index - sensor.1 > radius {
+  for ((sensor, radius), beacon) in zip(&sensor_position, &beacon_position) {
+    if (line_index - sensor.1).abs() > *radius {
       continue;
     }
     if beacon.1 == line_index {
       beacon_in_line.push(beacon.0);
     }
-    let min_x = sensor.0 - (radius - (sensor.1 - line_index).abs());
-    let max_x = sensor.0 + (radius - (sensor.1 - line_index).abs());
-    if beacon.1 == line_index {
-      beacon_in_line.push(beacon.0);
-    }
-    for x in min_x..=max_x {
-      line_to_check.push(x);
+    let min_x = sensor.0 - (radius - (sensor.1 - line_index).abs()).abs();
+    let max_x = sensor.0 + (radius - (sensor.1 - line_index).abs()).abs();
+    assert!(min_x <= max_x);
+    ranges.push((min_x, max_x));
+  }
+  // Merge stored range directly
+  for _loop in 0..2 {
+    for idx1 in 0..ranges.len()-1 {
+      for idx2 in idx1+1..ranges.len() {
+        let (range1, range2) = merge_range(ranges[idx1], ranges[idx2]);
+        ranges[idx1] = range1;
+        ranges[idx2] = range2;
+      }
     }
   }
-  line_to_check.sort();
-  line_to_check.dedup();
   beacon_in_line.sort();
   beacon_in_line.dedup();
-  let part1 = line_to_check.len() - beacon_in_line.len();
+  let part1 = (ranges[0].1 - ranges[0].0 + 1) as u64 - beacon_in_line.len() as u64;
 
   // part2
   let part2 = 'block: {
-    for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
-      let radius = manhattan(*sensor, *beacon);
+    for (sensor, radius) in &sensor_position {
       for y in (sensor.1 - radius - 1).max(0)..(sensor.1 + radius + 1).min(search_dim as i32) {
-        let min_x = (sensor.0 - (radius + 1 - (sensor.1 - y).abs())).max(0) as usize;
-        let max_x = (sensor.0 + (radius + 1 - (sensor.1 - y).abs())).min(search_dim as i32) as usize;
+        let min_x = (sensor.0 - (radius + 1 - (sensor.1 - y).abs())).max(0);
+        let max_x = (sensor.0 + (radius + 1 - (sensor.1 - y).abs())).min(search_dim as i32);
         // min_x
         let mut current = 0;
-        for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
-          let radius = manhattan(*sensor, *beacon);
-          if manhattan(*sensor, (min_x as i32, y as i32)) <= radius {
+        for (sensor, radius) in &sensor_position {
+          if manhattan(*sensor, (min_x, y)) <= *radius {
             current += 1;
             break;
           }
         }
         if current == 0 {
-          break 'block min_x * 4000000 + y as usize;
+          break 'block min_x as u64 * 4000000 + y as u64;
         }
         // max_x
         let mut current = 0;
-        for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
-          let radius = manhattan(*sensor, *beacon);
-          if manhattan(*sensor, (max_x as i32, y as i32)) <= radius {
+        for (sensor, radius) in &sensor_position {
+          if manhattan(*sensor, (max_x, y)) <= *radius {
             current += 1;
             break;
           }
         }
         if current == 0 {
-          break 'block max_x * 4000000 + y as usize;
+          break 'block max_x as u64 * 4000000 + y as u64;
         }
 
       }
@@ -174,5 +188,7 @@ mod tests {
   add_test!(
     main:   day15,        "data/day15.txt",       [5525990, 11756174628223];
     test1:  day15,        "data/day15_test1.txt", [26, 56000011];
+    main:   day15_speed,  "data/day15.txt",       [5525990, 11756174628223];
+    test1:  day15_speed,  "data/day15_test1.txt", [26, 56000011];
   );
 }
