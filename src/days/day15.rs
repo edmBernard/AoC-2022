@@ -51,6 +51,7 @@ impl std::fmt::Display for Board {
   }
 }
 
+#[inline(always)]
 fn manhattan(a: (i32, i32), b: (i32, i32)) -> i32 {
   (a.0 - b.0).abs() + (a.1 - b.1).abs()
 }
@@ -91,41 +92,28 @@ pub fn day15(filename: &Path) -> Result<ReturnType> {
     }
   }
   let part1 = line_to_check.len() - beacon_in_line.len();
-
+  println!("part1: {}", part1);
   // part2
-  const SEARCH_DIM : usize = 20;
-  // const SEARCH_DIM: usize = 4000000;
-  let mut board = Board {
-    data: vec![0; SEARCH_DIM * SEARCH_DIM as usize],
-    width: SEARCH_DIM,
-  };
-  for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
-    let radius = manhattan(*sensor, *beacon);
-    for y in (sensor.1 - radius).max(0)..(sensor.1 + radius).min(SEARCH_DIM as i32) {
-      let min_x = (sensor.0 - (radius - (sensor.1 - y).abs())).max(0) as usize;
-      let max_x = (sensor.0 + (radius + 1 - (sensor.1 - y).abs())).min(SEARCH_DIM as i32) as usize;
-      let min_offset = board.get_offset(min_x, y as usize);
-      let max_offset = board.get_offset(max_x, y as usize);
-      let slice = &mut board.data[min_offset..max_offset];
-      slice.fill(1);
-      // for x in (sensor.0 - (radius - (sensor.1 - y).abs())).max(0)..(sensor.0 + (radius + 1 - (sensor.1 - y).abs())).min(SEARCH_DIM as i32) {
-      //   // if board.get(&(x as usize, y as usize)) == 1 {
-      //   //   continue;
-      //   // }
-      //   *board.get_mut(x as usize, y as usize) = 1;
-      // }
+  // const SEARCH_DIM : usize = 20;
+  const SEARCH_DIM: usize = 4000000;
+  let part2 = 'block: {
+    for x in 0..SEARCH_DIM {
+      for y in 0..SEARCH_DIM {
+        let mut current = 0;
+        for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
+          let radius = manhattan(*sensor, *beacon);
+          if manhattan(*sensor, (x as i32, y as i32)) <= radius {
+            current += 1;
+            break;
+          }
+        }
+        if current == 0 {
+          break 'block x * 4000000 + y;
+        }
+      }
     }
-  }
-
-  let index = board
-    .data
-    .iter()
-    .enumerate()
-    .filter_map(|(size, elem)| if *elem == 0 { Some(size) } else { None })
-    .next()
-    .ok_or("No free space in range")?;
-  let part2 = index % SEARCH_DIM * 4000000 + index / SEARCH_DIM;
-
+    0
+  };
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
 
