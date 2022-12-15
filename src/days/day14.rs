@@ -18,6 +18,9 @@ impl Board {
   fn get(&self, pos: &(usize, usize)) -> char {
     self.data[pos.0 + pos.1 * self.width]
   }
+  fn get_mut(&mut self, x: usize, y: usize) -> &mut char {
+    &mut self.data[x + y * self.width]
+  }
   fn get_with_offset(&self, pos: &(usize, usize)) -> char {
     self.data[pos.0 - self.offset.0 + (pos.1 - self.offset.1) * self.width]
   }
@@ -40,7 +43,13 @@ impl Board {
 
 impl std::fmt::Display for Board {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    println!("offset:({}, {}) size:({}, {})", self.offset.0, self.offset.1, self.width, self.get_height());
+    println!(
+      "offset:({}, {}) size:({}, {})",
+      self.offset.0,
+      self.offset.1,
+      self.width,
+      self.get_height()
+    );
     for h in 0..(self.data.len() / self.width) {
       if h != 0 {
         write!(f, "\n")?
@@ -110,11 +119,11 @@ pub fn day14(filename: &Path) -> Result<ReturnType> {
   // Fill Board Part2 with the extra floor
   rock_shapes.push(Vec::new());
   let length = rock_shapes.len();
-  rock_shapes[length - 1].push((500-max_y-2, max_y + 2));
-  rock_shapes[length - 1].push((500+max_y+2, max_y + 2));
+  rock_shapes[length - 1].push((500 - max_y - 2, max_y + 2));
+  rock_shapes[length - 1].push((500 + max_y + 2, max_y + 2));
   let max_y = max_y + 2;
-  let min_x = 500-max_y-1;
-  let max_x = 500+max_y+1;
+  let min_x = 500 - max_y - 1;
+  let max_x = 500 + max_y + 1;
 
   let mut board_part2 = Board {
     data: vec!['.'; ((max_x - min_x + 1) * (max_y - 0 + 1)) as usize],
@@ -190,42 +199,31 @@ pub fn day14(filename: &Path) -> Result<ReturnType> {
   // Run part2 simulation
   // launch particules
   let mut part2 = 0;
-  'block: {
+  loop {
+    let mut particule = ((500 - min_x) as usize, 0);
+    if board_part2.get(&particule) != '.' {
+      break;
+    }
+    // move particule
     loop {
-      let mut particule = (500, 0);
-      if board_part2.get_with_offset(&particule) != '.' {
-        break;
+      let new_position = (particule.0, particule.1 + 1);
+      if board_part2.get(&new_position) == '.' {
+        particule = new_position;
+        continue;
       }
-      // move particule
-      loop {
-        let new_position = (particule.0, particule.1 + 1);
-        if board_part2.out_of_bound(&new_position) {
-          break 'block;
-        }
-        if board_part2.get_with_offset(&new_position) == '.' {
-          particule = new_position;
-          continue;
-        }
-        let new_position = (particule.0 - 1, particule.1 + 1);
-        if board_part2.out_of_bound(&new_position) {
-          break 'block;
-        }
-        if board_part2.get_with_offset(&new_position) == '.' {
-          particule = new_position;
-          continue;
-        }
-        let new_position = (particule.0 + 1, particule.1 + 1);
-        if board_part2.out_of_bound(&new_position) {
-          break 'block;
-        }
-        if board_part2.get_with_offset(&new_position) == '.' {
-          particule = new_position;
-          continue;
-        }
-        *board_part2.get_with_offset_mut(particule.0, particule.1) = 'o';
-        part2 += 1;
-        break;
+      let new_position = (particule.0 - 1, particule.1 + 1);
+      if board_part2.get(&new_position) == '.' {
+        particule = new_position;
+        continue;
       }
+      let new_position = (particule.0 + 1, particule.1 + 1);
+      if board_part2.get(&new_position) == '.' {
+        particule = new_position;
+        continue;
+      }
+      *board_part2.get_mut(particule.0, particule.1) = 'o';
+      part2 += 1;
+      break;
     }
   }
 
