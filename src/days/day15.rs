@@ -124,28 +124,37 @@ pub fn day15_speed(filename: &Path) -> Result<ReturnType> {
   let part1 = line_to_check.len() - beacon_in_line.len();
 
   // part2
-  let mut frontier_point = Vec::new();
-  for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
-    let radius = manhattan(*sensor, *beacon);
-    for y in (sensor.1 - radius - 1).max(0)..(sensor.1 + radius + 1).min(search_dim as i32) {
-      let min_x = (sensor.0 - (radius + 1 - (sensor.1 - y).abs())).max(0) as usize;
-      let max_x = (sensor.0 + (radius + 1 - (sensor.1 - y).abs())).min(search_dim as i32) as usize;
-      frontier_point.push((min_x, y as usize));
-      frontier_point.push((max_x, y as usize));
-    }
-  }
   let part2 = 'block: {
-    for (x, y) in frontier_point {
-      let mut current = 0;
-      for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
-        let radius = manhattan(*sensor, *beacon);
-        if manhattan(*sensor, (x as i32, y as i32)) <= radius {
-          current += 1;
-          break;
+    for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
+      let radius = manhattan(*sensor, *beacon);
+      for y in (sensor.1 - radius - 1).max(0)..(sensor.1 + radius + 1).min(search_dim as i32) {
+        let min_x = (sensor.0 - (radius + 1 - (sensor.1 - y).abs())).max(0) as usize;
+        let max_x = (sensor.0 + (radius + 1 - (sensor.1 - y).abs())).min(search_dim as i32) as usize;
+        // min_x
+        let mut current = 0;
+        for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
+          let radius = manhattan(*sensor, *beacon);
+          if manhattan(*sensor, (min_x as i32, y as i32)) <= radius {
+            current += 1;
+            break;
+          }
         }
-      }
-      if current == 0 {
-        break 'block x * 4000000 + y;
+        if current == 0 {
+          break 'block min_x * 4000000 + y as usize;
+        }
+        // max_x
+        let mut current = 0;
+        for (sensor, beacon) in zip(&sensor_position, &beacon_position) {
+          let radius = manhattan(*sensor, *beacon);
+          if manhattan(*sensor, (max_x as i32, y as i32)) <= radius {
+            current += 1;
+            break;
+          }
+        }
+        if current == 0 {
+          break 'block max_x * 4000000 + y as usize;
+        }
+
       }
     }
     0
