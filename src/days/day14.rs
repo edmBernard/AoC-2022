@@ -11,26 +11,36 @@ use crate::Result;
 struct Board {
   data: Vec<char>,
   width: usize,
+  offset: (usize, usize),
 }
 
 impl Board {
   fn get(&self, pos: &(usize, usize)) -> char {
     self.data[pos.0 + pos.1 * self.width]
   }
-  fn get_mut(&mut self, x: usize, y: usize) -> &mut char {
-    let w = self.width;
-    &mut self.data[x + y * w]
+  fn get_with_offset(&self, pos: &(usize, usize)) -> char {
+    self.data[pos.0 - self.offset.0 + (pos.1 - self.offset.1) * self.width]
   }
-  fn get_height(&mut self) -> usize {
+  fn get_with_offset_mut(&mut self, x: usize, y: usize) -> &mut char {
+    &mut self.data[x - self.offset.0 + (y - self.offset.1) * self.width]
+  }
+  fn get_height(&self) -> usize {
     self.data.len() / self.width
   }
-  fn get_offset(&self, x: usize, y: usize) -> usize {
-    x + y * self.width
+  fn out_of_bound(&self, pos: &(usize, usize)) -> bool {
+    if pos.0 < self.offset.0 || pos.0 >= self.offset.0 + self.width {
+      true
+    } else if pos.1 < self.offset.1 || pos.1 >= self.offset.1 + self.get_height() {
+      true
+    } else {
+      false
+    }
   }
 }
 
 impl std::fmt::Display for Board {
   fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    println!("offset:({}, {}) size:({}, {})", self.offset.0, self.offset.1, self.width, self.get_height());
     for h in 0..(self.data.len() / self.width) {
       if h != 0 {
         write!(f, "\n")?
@@ -67,8 +77,9 @@ pub fn day14(filename: &Path) -> Result<ReturnType> {
   };
 
   let mut board = Board {
-    data: vec!['.'; ((max_x - min_x + 1) * (max_y - min_y + 1)) as usize],
+    data: vec!['.'; ((max_x - min_x + 1) * (max_y - 0 + 1)) as usize],
     width: (max_x - min_x + 1) as usize,
+    offset: (min_x as usize, 0 as usize),
   };
 
   for rock_shape in &rock_shapes {
@@ -82,24 +93,59 @@ pub fn day14(filename: &Path) -> Result<ReturnType> {
       let step_x = (x_max - x_min).min(1);
       let step_y = (y_max - y_min).min(1);
       if step_x == 0 {
-        for y in (*y_min..*y_max).step_by(step_y as usize) {
-          *board.get_mut((*x_min - min_x) as usize, (y - min_y) as usize) = '#';
+        for y in (*y_min..=*y_max).step_by(step_y as usize) {
+          *board.get_with_offset_mut(*x_min as usize, y as usize) = '#';
         }
       }
 
       if step_y == 0 {
-        for x in (*x_min..*x_max).step_by(step_x as usize) {
-          *board.get_mut((x - min_x) as usize, (*y_min - min_y) as usize) = '#';
+        for x in (*x_min..=*x_max).step_by(step_x as usize) {
+          *board.get_with_offset_mut(x as usize, *y_min as usize) = '#';
         }
       }
     }
   }
-  for x in min_x..=max_x {
-    for y in min_y..=max_y {}
+
+  println!("{}", board);
+  // launch particules
+  let mut part1 = 0;
+  'block: {
+    loop {
+      let mut particule = (500, 0);
+      // move particule
+      loop {
+        let new_position = (particule.0, particule.1 + 1);
+        if board.out_of_bound(&new_position) {
+          break 'block;
+        }
+        if board.get_with_offset(&new_position) == '.' {
+          particule = new_position;
+          continue;
+        }
+        let new_position = (particule.0 - 1, particule.1 + 1);
+        if board.out_of_bound(&new_position) {
+          break 'block;
+        }
+        if board.get_with_offset(&new_position) == '.' {
+          particule = new_position;
+          continue;
+        }
+        let new_position = (particule.0 + 1, particule.1 + 1);
+        if board.out_of_bound(&new_position) {
+          break 'block;
+        }
+        if board.get_with_offset(&new_position) == '.' {
+          particule = new_position;
+          continue;
+        }
+        *board.get_with_offset_mut(particule.0, particule.1) = 'o';
+        part1 += 1;
+        break;
+      }
+    }
   }
   println!("{}", board);
 
-  let mut part1 = 0;
   let mut part2 = 0;
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
