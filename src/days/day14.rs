@@ -70,11 +70,19 @@ pub fn day14(filename: &Path) -> Result<ReturnType> {
     OneElement(x) => (x, x),
     MinMax(x, y) => (x, y),
   };
-  let (min_y, max_y) = match rock_shapes.iter().flatten().map(|elem| elem.1).minmax() {
+  let (_, max_y) = match rock_shapes.iter().flatten().map(|elem| elem.1).minmax() {
     NoElements => panic!("NoMinMax"),
     OneElement(x) => (x, x),
     MinMax(x, y) => (x, y),
   };
+
+  rock_shapes.push(Vec::new());
+  let length = rock_shapes.len();
+  rock_shapes[length - 1].push((500-max_y-2, max_y + 2));
+  rock_shapes[length - 1].push((500+max_y+2, max_y + 2));
+  let max_y = max_y + 2;
+  let min_x = 500-max_y-1;
+  let max_x = 500+max_y+1;
 
   let mut board = Board {
     data: vec!['.'; ((max_x - min_x + 1) * (max_y - 0 + 1)) as usize],
@@ -112,6 +120,9 @@ pub fn day14(filename: &Path) -> Result<ReturnType> {
   'block: {
     loop {
       let mut particule = (500, 0);
+      if board.get_with_offset(&particule) != '.' {
+        break;
+      }
       // move particule
       loop {
         let new_position = (particule.0, particule.1 + 1);
