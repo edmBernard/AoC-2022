@@ -49,19 +49,19 @@ The executable is named `AoC-2022`. Inputs path can be specified as argument or 
 
 ```
 In Rust
-days::day01::day01_speed       in   67.84 us : part1=70720      part2=207148
-days::day02::day02_speed       in   81.44 us : part1=11475      part2=16862
-days::day03::day03_speed       in   73.59 us : part1=8202       part2=2864
-days::day04::day04_speed       in   62.08 us : part1=490        part2=921
-days::day05::day05_speed       in   86.36 us : part1=ZWHVFWQWW  part2=HZFZCCWWV
-days::day06::day06_speed       in   52.09 us : part1=1282       part2=3513
-days::day07::day07             in  276.58 us : part1=1543140    part2=1117448
-days::day08::day08_speed       in  257.59 us : part1=1688       part2=410400
-days::day09::day09_speed       in  383.57 us : part1=6503       part2=2724
-days::day10::day10             in   43.77 us : part1=11720      part2=2
-days::day11::day11_speed       in 1999.36 us : part1=117624     part2=16792940265
-days::day12::day12_speed       in 1567.76 us : part1=437        part2=430
-days::day15::day15_speed       in 309492.00 us : part1=5525990    part2=11756174628223
+days::day01::day01_speed       in    67.84 us : part1=70720      part2=207148
+days::day02::day02_speed       in    81.44 us : part1=11475      part2=16862
+days::day03::day03_speed       in    73.59 us : part1=8202       part2=2864
+days::day04::day04_speed       in    62.08 us : part1=490        part2=921
+days::day05::day05_speed       in    86.36 us : part1=ZWHVFWQWW  part2=HZFZCCWWV
+days::day06::day06_speed       in    52.09 us : part1=1282       part2=3513
+days::day07::day07             in   276.58 us : part1=1543140    part2=1117448
+days::day08::day08_speed       in   257.59 us : part1=1688       part2=410400
+days::day09::day09_speed       in   383.57 us : part1=6503       part2=2724
+days::day10::day10             in    43.77 us : part1=11720      part2=2
+days::day11::day11_speed       in  1999.36 us : part1=117624     part2=16792940265
+days::day12::day12_speed       in  1567.76 us : part1=437        part2=430
+days::day15::day15_speed       in 80840.20 us : part1=5525990    part2=11756174628223
 
 In C++
 day01_speed_iter               in 66.7159 us : part1=70720      part2=207148

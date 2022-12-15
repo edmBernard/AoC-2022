@@ -108,13 +108,16 @@ pub fn day15_speed(filename: &Path) -> Result<ReturnType> {
     if line_index - sensor.1 > radius {
       continue;
     }
-    for x in sensor.0 - radius..sensor.0 + radius {
-      if manhattan(*sensor, (x, line_index)) <= radius {
-        line_to_check.push(x);
-      }
-      if beacon.1 == line_index {
-        beacon_in_line.push(beacon.0);
-      }
+    if beacon.1 == line_index {
+      beacon_in_line.push(beacon.0);
+    }
+    let min_x = sensor.0 - (radius - (sensor.1 - line_index).abs());
+    let max_x = sensor.0 + (radius - (sensor.1 - line_index).abs());
+    if beacon.1 == line_index {
+      beacon_in_line.push(beacon.0);
+    }
+    for x in min_x..=max_x {
+      line_to_check.push(x);
     }
   }
   line_to_check.sort();
