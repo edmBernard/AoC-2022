@@ -1,79 +1,48 @@
 // #![allow(unused_variables)]
 
-use itertools::Itertools;
 use regex::Regex;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::path::Path;
 
 use crate::utils::ReturnType;
 use crate::Result;
 
-fn go_deeper(
-  valve_graph: &HashMap<&str, Vec<&str>>,
-  valve_flow: &HashMap<&str, i32>,
-  current_id: &str,
-  current_score: i32,
-  current_flow_rate: i32,
-  count: i32,
-  valve_status: &HashSet<&str>,
-  cache: &mut HashMap<(i32, String, i32), i32>,
+fn dfs(
+  valve_index: usize,
+  remaining_time: i32,
+  remaning_valve: Vec<usize>,
+  valve_flow: &Vec<i32>,
+  adjacent_matrix: &Vec<Vec<i32>>,
+  cache: &mut HashMap<(usize, i32, Vec<usize>), i32>,
 ) -> i32 {
-  if count > 30 {
-    return current_score;
+  let cache_key = (valve_index, remaining_time, remaning_valve.clone());
+  if let Some(cached_value) = cache.get(&cache_key) {
+    return *cached_value;
   }
 
-  let cache_key = (count, current_id.to_string(), current_flow_rate);
-  if let Some(cached_value) = cache.get(&cache_key) {
-    if *cached_value >= current_score {
-      // println!("flow_rate:{} score:{} cached:{}", current_flow_rate, current_score, *cached_value);
-      return current_score;
+  let mut score = 0;
+  for idx in 0..remaning_valve.len() {
+    let next = remaning_valve[idx];
+    let remain = [&remaning_valve[..idx], &remaning_valve[idx + 1..]].concat();
+    if adjacent_matrix[valve_index][next] < remaining_time {
+      let time = remaining_time - adjacent_matrix[valve_index][next] - 1;
+      score = score
+        .max(valve_flow[next] * (remaining_time - adjacent_matrix[valve_index][next] - 1) +
+          dfs(next, time, remain,valve_flow,adjacent_matrix, cache));
     }
   }
-  cache.insert(cache_key, current_score);
-
-  // println!("id:{}, count:{}, score:{}, flow_rate:{}", current_id, count, current_score, current_flow_rate);
-  let new_score = current_score + current_flow_rate;
-
-  let mut score = new_score;
-  // choice 1: open valve
-  let current_flow = *valve_flow.get(&current_id).unwrap();
-  if !valve_status.contains(&current_id) && current_flow != 0 {
-    let mut valve_status_clone = valve_status.clone();
-    valve_status_clone.insert(&current_id);
-
-    let new_flow_rate = current_flow_rate + current_flow;
-    score = go_deeper(
-      valve_graph,
-      valve_flow,
-      current_id,
-      new_score,
-      new_flow_rate,
-      count + 1,
-      &valve_status_clone,
-      cache,
-    );
-  }
-
-  // choice 2: next valve
-  for valve in valve_graph.get(&current_id).unwrap() {
-    score = go_deeper(
-      valve_graph,
-      valve_flow,
-      valve,
-      new_score,
-      current_flow_rate,
-      count + 1,
-      valve_status,
-      cache,
-    ).max(score);
-  }
+  cache.insert(cache_key, score);
   score
 }
 
+// For part1 my solution was wrong only on the real input, I was on off and haven't found why
+// Here is a translation in rust of https://github.com/betaveros/advent-of-code-2022/blob/main/p16.noul
+// that give the right result
 pub fn day16(filename: &Path) -> Result<ReturnType> {
-  let mut valve_graph = HashMap::new();
-  let mut valve_flow = HashMap::new();
-  let mut valve_status = HashSet::new();
+  let mut valve_index = Vec::new();
+  let mut valve_connection = Vec::new();
+  let mut valve_flow = Vec::new();
+
   // Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
   let re = Regex::new(r"([A-Z]{2}).*=(\d+).+?((?:,? [A-Z]{2})+)")?;
   let content = std::fs::read_to_string(filename)?;
@@ -89,32 +58,47 @@ pub fn day16(filename: &Path) -> Result<ReturnType> {
       .get(3)
       .ok_or("Fail to capture next valves id")?
       .as_str()
-      .split(",")
+      .split(',')
       .map(|elem| elem.trim())
       .collect::<Vec<_>>();
 
-    valve_graph.insert(current_valve, next_valve);
-    valve_flow.insert(current_valve, flow_rate);
-    // valve_status.insert(current_valve, false);
+    valve_index.push(current_valve);
+    valve_connection.push(next_valve);
+    valve_flow.push(flow_rate);
   }
-  let content = std::fs::read_to_string(filename)?;
-  for line in content.lines() {
-    let caps = re.captures(line).ok_or("Fail to capture")?;
-    let current_valve = caps.get(1).ok_or("Fail to capture valve id")?.as_str();
 
-    let list = valve_graph.get(current_valve).unwrap().iter().join(", ");
-    println!(
-      "Valve {} has flow rate={}; tunnels lead to valves {}",
-      current_valve,
-      valve_flow.get(current_valve).unwrap(),
-      list
-    );
+  let mut adjacent_matrix = vec![vec![99; valve_index.len()]; valve_index.len()];
+  for (idx, connections) in valve_connection.iter().enumerate() {
+    for connection in connections {
+      adjacent_matrix[idx][valve_index.iter().position(|e| e == connection).unwrap()] = 1;
+    }
   }
+
+  // Floyd-Warshall
+  for k in 0..valve_index.len() {
+    for i in 0..valve_index.len() {
+      for j in 0..valve_index.len() {
+        adjacent_matrix[i][j] = adjacent_matrix[i][j].min(adjacent_matrix[i][k] + adjacent_matrix[k][j]);
+      }
+    }
+  }
+
+  let valve_with_flow = valve_flow
+    .iter()
+    .enumerate()
+    .filter_map(|(i, &f)| if f > 0 { Some(i) } else { None })
+    .collect::<Vec<_>>();
 
   let mut cache = HashMap::new();
-  let part1 = go_deeper(&valve_graph, &valve_flow, "AA", 0, 0, 1, &valve_status, &mut cache);
+  let part1 = dfs(
+    valve_index.iter().position(|&e| e == "AA").unwrap(),
+    30,
+    valve_with_flow,
+    &valve_flow,
+    &adjacent_matrix,
+    &mut cache,
+  );
 
-  println!("IT DON'T WORK, I WAS OFF BY 1 POINT");
   Ok(ReturnType::Numeric(part1 as u64, 2 as u64))
 }
 

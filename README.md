@@ -45,6 +45,7 @@ The executable is named `AoC-2022`. Inputs path can be specified as argument or 
 | Day12 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/12) [<sup>solution</sup>](src/days/day12.rs) | Search path algorithm (BFS or Dijkstra) | Start from the End and different stop condition for part1 and part2 |
 | Day14 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/14) [<sup>solution</sup>](src/days/day14.rs) | Sandfall | - |
 | Day15 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/15) [<sup>solution</sup>](src/days/day15.rs) | Blind spot in Sensor Area | Check only points in frontier of the detected area |
+| Day16 [<sup>puzzle</sup>](https://adventofcode.com/2022/day/16) [<sup>solution</sup>](src/days/day16.rs) | Graph search with valve | Floyd-Warshall and memoization |
 
 ## Some Timing on `10'000` run :
 
