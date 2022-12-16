@@ -24,18 +24,47 @@ fn dfs(
   for idx in 0..remaning_valve.len() {
     let next = remaning_valve[idx];
     let remain = [&remaning_valve[..idx], &remaning_valve[idx + 1..]].concat();
-    if adjacent_matrix[valve_index][next] < remaining_time {
-      let time = remaining_time - adjacent_matrix[valve_index][next] - 1;
-      score = score
-        .max(valve_flow[next] * (remaining_time - adjacent_matrix[valve_index][next] - 1) +
-          dfs(next, time, remain,valve_flow,adjacent_matrix, cache));
+    if adjacent_matrix[valve_index][next] >= remaining_time {
+      continue;
     }
+    let time = remaining_time - adjacent_matrix[valve_index][next] - 1;
+    score = score.max(
+      valve_flow[next] * (remaining_time - adjacent_matrix[valve_index][next] - 1)
+        + dfs(next, time, remain, valve_flow, adjacent_matrix, cache),
+    );
   }
   cache.insert(cache_key, score);
   score
 }
 
-// For part1 my solution was wrong only on the real input, I was on off and haven't found why
+// caching part2 result is negligible because we still use caching of dfs
+fn dfs2(
+  valve_index: usize,
+  remaining_time: i32,
+  remaning_valve: Vec<usize>,
+  aa_index: usize,
+  valve_flow: &Vec<i32>,
+  adjacent_matrix: &Vec<Vec<i32>>,
+  cache: &mut HashMap<(usize, i32, Vec<usize>), i32>,
+) -> i32 {
+
+  let mut score = 0;
+  for idx in 0..remaning_valve.len() {
+    let next = remaning_valve[idx];
+    if adjacent_matrix[valve_index][next] >= remaining_time {
+      continue;
+    }
+    let remain = [&remaning_valve[..idx], &remaning_valve[idx + 1..]].concat();
+    let time = remaining_time - adjacent_matrix[valve_index][next] - 1;
+    score = score.max(valve_flow[next] * (remaining_time - adjacent_matrix[valve_index][next] - 1)
+                    + dfs2(next, time, remain, aa_index, valve_flow, adjacent_matrix, cache));
+  }
+
+  let temp_score = dfs(aa_index, 26, remaning_valve.clone(), valve_flow, adjacent_matrix, cache);
+  i32::max(temp_score, score)
+}
+
+// For part1 my solution was wrong only on the real input, I was on off by 1 and haven't found why
 // Here is a translation in rust of https://github.com/betaveros/advent-of-code-2022/blob/main/p16.noul
 // that give the right result
 pub fn day16(filename: &Path) -> Result<ReturnType> {
@@ -90,16 +119,26 @@ pub fn day16(filename: &Path) -> Result<ReturnType> {
     .collect::<Vec<_>>();
 
   let mut cache = HashMap::new();
+  let aa_index = valve_index.iter().position(|&e| e == "AA").unwrap();
   let part1 = dfs(
-    valve_index.iter().position(|&e| e == "AA").unwrap(),
+    aa_index,
     30,
-    valve_with_flow,
+    valve_with_flow.clone(),
     &valve_flow,
     &adjacent_matrix,
     &mut cache,
   );
+  let part2 = dfs2(
+    aa_index,
+    26,
+    valve_with_flow,
+    aa_index,
+    &valve_flow,
+    &adjacent_matrix,
+    &mut cache
+  );
 
-  Ok(ReturnType::Numeric(part1 as u64, 2 as u64))
+  Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
 }
 
 #[cfg(test)]
@@ -109,7 +148,7 @@ mod tests {
 
   #[rustfmt::skip::macros(add_test)]
   add_test!(
-    main:   day16,        "data/day16.txt",       [1003, 25771];
-    test1:  day16,        "data/day16_test1.txt", [24, 93];
+    main:   day16,        "data/day16.txt",       [1754, 2474];
+    test1:  day16,        "data/day16_test1.txt", [24, 1707];
   );
 }

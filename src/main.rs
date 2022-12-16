@@ -64,7 +64,7 @@ macro_rules! register_command {
 /// * `name` - name of the command
 fn measure_command_execution(command: &CommandFunction, filepath: &Path, name: &str) -> Option<u128> {
   let now = Instant::now();
-  const NRUN: u32 = 10000;
+  const NRUN: u32 = 1;
   for _ in 0..NRUN-1 {
     _ = command(filepath);
   }
