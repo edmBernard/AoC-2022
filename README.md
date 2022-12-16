@@ -65,7 +65,7 @@ days::day11::day11_speed       in  1999.36 us : part1=117624     part2=167929402
 days::day12::day12_speed       in  1567.76 us : part1=437        part2=430
 days::day14::day14             in  3489.00 us : part1=1003       part2=25771
 days::day15::day15_speed       in 14748.00 us : part1=5525990    part2=11756174628223
-days::day16::day16             in 4110837.00 us : part1=1754       part2=2474
+days::day16::day16             in 3734649.00 us : part1=1754       part2=2474
 
 In C++
 day01_speed_iter               in 66.7159 us : part1=70720      part2=207148

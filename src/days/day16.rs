@@ -23,10 +23,11 @@ fn dfs(
   let mut score = 0;
   for idx in 0..remaning_valve.len() {
     let next = remaning_valve[idx];
-    let remain = [&remaning_valve[..idx], &remaning_valve[idx + 1..]].concat();
     if adjacent_matrix[valve_index][next] >= remaining_time {
       continue;
     }
+    let mut remain = remaning_valve.clone();
+    remain.remove(idx);
     let time = remaining_time - adjacent_matrix[valve_index][next] - 1;
     score = score.max(
       valve_flow[next] * (remaining_time - adjacent_matrix[valve_index][next] - 1)
@@ -45,8 +46,14 @@ fn dfs2(
   aa_index: usize,
   valve_flow: &Vec<i32>,
   adjacent_matrix: &Vec<Vec<i32>>,
-  cache: &mut HashMap<(usize, i32, Vec<usize>), i32>,
+  cache1: &mut HashMap<(usize, i32, Vec<usize>), i32>,
+  cache2: &mut HashMap<(usize, i32, Vec<usize>), i32>,
 ) -> i32 {
+
+  let cache_key = (valve_index, remaining_time, remaning_valve.clone());
+  if let Some(cached_value) = cache2.get(&cache_key) {
+    return *cached_value;
+  }
 
   let mut score = 0;
   for idx in 0..remaning_valve.len() {
@@ -54,13 +61,15 @@ fn dfs2(
     if adjacent_matrix[valve_index][next] >= remaining_time {
       continue;
     }
-    let remain = [&remaning_valve[..idx], &remaning_valve[idx + 1..]].concat();
+    let mut remain = remaning_valve.clone();
+    remain.remove(idx);
     let time = remaining_time - adjacent_matrix[valve_index][next] - 1;
     score = score.max(valve_flow[next] * (remaining_time - adjacent_matrix[valve_index][next] - 1)
-                    + dfs2(next, time, remain, aa_index, valve_flow, adjacent_matrix, cache));
+                    + dfs2(next, time, remain, aa_index, valve_flow, adjacent_matrix, cache1, cache2));
   }
 
-  let temp_score = dfs(aa_index, 26, remaning_valve.clone(), valve_flow, adjacent_matrix, cache);
+  let temp_score = dfs(aa_index, 26, remaning_valve.clone(), valve_flow, adjacent_matrix, cache1);
+  cache2.insert(cache_key, i32::max(temp_score, score));
   i32::max(temp_score, score)
 }
 
@@ -118,7 +127,8 @@ pub fn day16(filename: &Path) -> Result<ReturnType> {
     .filter_map(|(i, &f)| if f > 0 { Some(i) } else { None })
     .collect::<Vec<_>>();
 
-  let mut cache = HashMap::new();
+  let mut cache1 = HashMap::new();
+  let mut cache2 = HashMap::new();
   let aa_index = valve_index.iter().position(|&e| e == "AA").unwrap();
   let part1 = dfs(
     aa_index,
@@ -126,7 +136,7 @@ pub fn day16(filename: &Path) -> Result<ReturnType> {
     valve_with_flow.clone(),
     &valve_flow,
     &adjacent_matrix,
-    &mut cache,
+    &mut cache1,
   );
   let part2 = dfs2(
     aa_index,
@@ -135,7 +145,8 @@ pub fn day16(filename: &Path) -> Result<ReturnType> {
     aa_index,
     &valve_flow,
     &adjacent_matrix,
-    &mut cache
+    &mut cache1,
+    &mut cache2
   );
 
   Ok(ReturnType::Numeric(part1 as u64, part2 as u64))
