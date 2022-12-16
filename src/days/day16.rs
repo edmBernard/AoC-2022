@@ -1,15 +1,15 @@
 // #![allow(unused_variables)]
 
+use itertools::Itertools;
 use regex::Regex;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 use crate::utils::ReturnType;
 use crate::Result;
 
-
 fn go_deeper(valve_graph: &HashMap<&str, Vec<&str>>, valve_flow: &HashMap<&str, i32>, current_id: &str, current_score: i32, current_flow_rate: i32, count: i32, valve_status: &HashMap<&str, bool>, cache: &mut HashMap<(i32, String, i32), i32>) -> i32 {
-  if count > 29 {
+  if count > 30 {
     return current_score;
   }
 
@@ -21,7 +21,7 @@ fn go_deeper(valve_graph: &HashMap<&str, Vec<&str>>, valve_flow: &HashMap<&str, 
   }
   cache.insert(cache_key, current_score);
 
-  // println!("id:{}, count:{}, score:{}", current_id, count, current_score);
+  // println!("id:{}, count:{}, score:{}, flow_rate:{}", current_id, count, current_score, current_flow_rate);
 
   let mut score = current_score;
   // choice 1: open valve
@@ -41,7 +41,7 @@ fn go_deeper(valve_graph: &HashMap<&str, Vec<&str>>, valve_flow: &HashMap<&str, 
     let score_next = go_deeper(valve_graph, valve_flow, valve, new_score, current_flow_rate, count + 1, valve_status, cache);
     score = score.max(score_next);
   }
-  return score;
+  score
 }
 
 pub fn day16(filename: &Path) -> Result<ReturnType> {
@@ -71,12 +71,19 @@ pub fn day16(filename: &Path) -> Result<ReturnType> {
     valve_flow.insert(current_valve, flow_rate);
     valve_status.insert(current_valve, false);
   }
-  for (k, v) in &valve_graph {
-    println!("ID:{}, Flow:{:?}, Next:[{:?}]", k, valve_flow.get(k), v)
+  let content = std::fs::read_to_string(filename)?;
+  for line in content.lines() {
+    let caps = re.captures(line).ok_or("Fail to capture")?;
+    let current_valve = caps.get(1).ok_or("Fail to capture valve id")?.as_str();
+
+    let list = valve_graph.get(current_valve).unwrap().iter().join(", ");
+    println!("Valve {} has flow rate={}; tunnels lead to valves {}", current_valve, valve_flow.get(current_valve).unwrap(), list);
+    // println!("ID:{}, Flow:{:?}, Next:[{:?}]", k, valve_flow.get(k), v)
   }
 
   let mut cache = HashMap::new();
-  let part1 = go_deeper(&valve_graph, &valve_flow, "AA", 0, 0, 0, &valve_status, &mut cache);
+  let part1 = go_deeper(&valve_graph, &valve_flow, "AA", 0, 0, 1, &valve_status, &mut cache);
+
   Ok(ReturnType::Numeric(part1 as u64, 2 as u64))
 }
 
