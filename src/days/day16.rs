@@ -128,7 +128,6 @@ pub fn day16(filename: &Path) -> Result<ReturnType> {
     .collect::<Vec<_>>();
 
   let mut cache1 = HashMap::new();
-  let mut cache2 = HashMap::new();
   let aa_index = valve_index.iter().position(|&e| e == "AA").unwrap();
   let part1 = dfs(
     aa_index,
@@ -138,6 +137,7 @@ pub fn day16(filename: &Path) -> Result<ReturnType> {
     &adjacent_matrix,
     &mut cache1,
   );
+  let mut cache2 = HashMap::new();
   let part2 = dfs2(
     aa_index,
     26,
