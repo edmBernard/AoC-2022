@@ -121,8 +121,8 @@ fn main() {
     days::day15::day15_speed,
     days::day15::day15_only_range,
     days::day16::day16,
-    days::day17::day17
-    // days::day18::day18,
+    days::day17::day17,
+    days::day18::day18
     // days::day19::day19,
     // days::day20::day20,
     // days::day21::day21,
